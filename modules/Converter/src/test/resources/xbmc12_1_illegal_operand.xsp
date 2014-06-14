@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="songs">
+    <name>A TEST</name>
+    <match>one</match>
+    <rule field="lastplayed" operator="contains">
+        <value>2000-01-03</value>
+    </rule>
+    <order direction="ascending">tracknumber</order>
+</smartplaylist>

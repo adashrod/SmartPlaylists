@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="songs">
+    <name>Neo-Swing</name>
+    <match>one</match>
+    <rule operator="lessthan" field="time">4:101</rule>
+    <rule operator="inthelast" field="lastplayed">48 hoors</rule>
+</smartplaylist>
