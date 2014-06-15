@@ -59,7 +59,7 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
         STRING_FIELD_MAP.put(4, MetadataField.GENRE);
         STRING_FIELD_MAP.put(5, MetadataField.FILE_NAME);
         NUMBER_FIELD_MAP.put(6, MetadataField.YEAR);
-        NUMBER_FIELD_MAP.put(7, MetadataField.TIME); // time units
+        NUMBER_FIELD_MAP.put(7, MetadataField.DURATION); // time units
         NUMBER_FIELD_MAP.put(8, MetadataField.RATING);
         NUMBER_FIELD_MAP.put(9, MetadataField.PLAY_COUNT);
         NUMBER_FIELD_MAP.put(12, MetadataField.TRACK_NUMBER);
@@ -91,7 +91,7 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
         ORDER_BY_MAP.put(5, MetadataField.GENRE);
         ORDER_BY_MAP.put(6, MetadataField.FILE_NAME);
         ORDER_BY_MAP.put(7, MetadataField.YEAR);
-        ORDER_BY_MAP.put(8, MetadataField.TIME);
+        ORDER_BY_MAP.put(8, MetadataField.DURATION);
         ORDER_BY_MAP.put(9, MetadataField.RATING);
         ORDER_BY_MAP.put(10, MetadataField.PLAY_COUNT);
         ORDER_BY_MAP.put(11, MetadataField.DATE_ADDED);
@@ -156,7 +156,7 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
             } else if (NUMBER_FIELD_KEYS.contains(field)) {
                 smartRule.setField(NUMBER_FIELD_MAP.get(field));
                 smartRule.setOperator(NUMBER_OPERATOR_MAP.get(gmmpRule.getOperator()));
-                if (NUMBER_FIELD_MAP.get(field) == MetadataField.TIME) {
+                if (NUMBER_FIELD_MAP.get(field) == MetadataField.DURATION) {
                     smartRule.setOperand(new Time(Integer.parseInt(gmmpRule.getValue()), TIME_UNIT_MAP.get(gmmpRule.getTimeUnit())));
                 } else {
                     smartRule.setOperand(gmmpRule.getValue());

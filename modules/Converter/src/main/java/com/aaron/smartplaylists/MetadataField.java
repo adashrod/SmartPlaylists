@@ -5,24 +5,29 @@ package com.aaron.smartplaylists;
  * only be used in the context of ordering, not rules.
  */
 public enum MetadataField {
-    GENRE,
-    ALBUM,
+    // strings
     ARTIST,
     ALBUM_ARTIST,
     TITLE,
-    YEAR,
-    TIME,
-    TRACK_NUMBER,
-    FILE_NAME,
+    ALBUM,
+    GENRE,
     PATH,
-    PLAY_COUNT,
-    LAST_PLAYED,
-    RATING,
+    FILE_NAME,
     COMMENT,
     PLAYLIST,
 
-    DATE_ADDED,
+    // numbers/times
+    YEAR,
     DISC_NUMBER,
+    TRACK_NUMBER,
+    DURATION, // time
+    PLAY_COUNT,
+    RATING,
 
+    // dates/numbers
+    LAST_PLAYED,
+    DATE_ADDED,
+
+    // used only for ordering
     RANDOM
 }

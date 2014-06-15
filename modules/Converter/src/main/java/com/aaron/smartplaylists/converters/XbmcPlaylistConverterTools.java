@@ -42,7 +42,7 @@ public class XbmcPlaylistConverterTools {
         FIELD_MAP.put("albumartist", MetadataField.ALBUM_ARTIST);
         FIELD_MAP.put("title", MetadataField.TITLE);
         FIELD_MAP.put("year", MetadataField.YEAR);
-        FIELD_MAP.put("time", MetadataField.TIME);
+        FIELD_MAP.put("time", MetadataField.DURATION);
         FIELD_MAP.put("tracknumber", MetadataField.TRACK_NUMBER);
         FIELD_MAP.put("filename", MetadataField.FILE_NAME);
         FIELD_MAP.put("path", MetadataField.PATH);
@@ -112,7 +112,7 @@ public class XbmcPlaylistConverterTools {
             } else {
                 throw new IllegalArgumentException("Combination of field and operand types not allowed: " + xbmcRule);
             }
-        } else if (smartRule.getField() == MetadataField.TIME) {
+        } else if (smartRule.getField() == MetadataField.DURATION) {
             smartRule.setOperand(Time.parse(xbmcRule.getOperand()));
         } else {
             smartRule.setOperand(xbmcRule.getOperand());
@@ -194,7 +194,7 @@ public class XbmcPlaylistConverterTools {
             if (smartRule.getField() == MetadataField.LAST_PLAYED) {
                 final Pair<Integer, Time.TimeUnit> period = time.getLargestUnit(Time.TimeUnit.WEEKS);
                 xbmcRule.setOperand(period.getFirst() + " " + TIME_UNIT_MAP.get(period.getSecond()));
-            } else if (smartRule.getField() == MetadataField.TIME) {
+            } else if (smartRule.getField() == MetadataField.DURATION) {
                 xbmcRule.setOperand(time.toString());
             } else {
                 throw new IllegalArgumentException("Combination of field and operand types not allowed: " + smartRule);
