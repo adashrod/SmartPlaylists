@@ -144,7 +144,11 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
         final Order order = new Order();
         order.setAscending(gmmpSmartPlaylist.isAscending());
         order.setKey(ORDER_BY_MAP.get(gmmpSmartPlaylist.getOrder()));
-        result.setOrder(order);
+        if (order.getKey() != null) {
+            result.setOrder(order);
+        } else {
+            log(errorLog, String.format("Invalid order value \"%d\" in GMMP playlist", gmmpSmartPlaylist.getOrder()));
+        }
 
         for (final GmmpSmartPlaylist.Rule gmmpRule: gmmpSmartPlaylist.getRules()) {
             final Rule smartRule = new Rule();
@@ -156,8 +160,16 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
             } else if (NUMBER_FIELD_KEYS.contains(field)) {
                 smartRule.setField(NUMBER_FIELD_MAP.get(field));
                 smartRule.setOperator(NUMBER_OPERATOR_MAP.get(gmmpRule.getOperator()));
-                if (NUMBER_FIELD_MAP.get(field) == MetadataField.DURATION) {
-                    smartRule.setOperand(new Time(Integer.parseInt(gmmpRule.getValue()), TIME_UNIT_MAP.get(gmmpRule.getTimeUnit())));
+                if (smartRule.getField() == MetadataField.DURATION) {
+                    final int amountOfTime = Integer.parseInt(gmmpRule.getValue());
+                    final Time.TimeUnit timeUnit = TIME_UNIT_MAP.get(gmmpRule.getTimeUnit());
+                    if (amountOfTime < 0) {
+                        log(errorLog, String.format("Negative times are not allowed %d", amountOfTime));
+                    } else if (timeUnit == null) {
+                        log(errorLog, String.format("Invalid time unit value %d", gmmpRule.getTimeUnit()));
+                    } else {
+                        smartRule.setOperand(new Time(amountOfTime, timeUnit));
+                    }
                 } else {
                     smartRule.setOperand(gmmpRule.getValue());
                 }
@@ -174,15 +186,24 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
                     }
                 } else if (smartRule.getOperator() == Operator.IN_THE_LAST || smartRule.getOperator() == Operator.NOT_IN_THE_LAST) {
                     // time period
-                    smartRule.setOperand(new Time(Integer.parseInt(gmmpRule.getValue()), TIME_UNIT_MAP.get(gmmpRule.getTimeUnit())));
-                } else {
-                    log(errorLog, String.format("Invalid combination of field \"%d\" (%s) and operator \"%d\" (only allowed values are (0,1,2,3)) in GMMP rule:\n%s",
-                        field, DATE_FIELD_MAP.get(field), gmmpRule.getOperator(), gmmpRule));
+                    final int amountOfTime = Integer.parseInt(gmmpRule.getValue());
+                    final Time.TimeUnit timeUnit = TIME_UNIT_MAP.get(gmmpRule.getTimeUnit());
+                    if (amountOfTime < 0) {
+                        log(errorLog, String.format("Negative times are not allowed %d", amountOfTime));
+                    } else if (timeUnit == null) {
+                        log(errorLog, String.format("Invalid time unit value %d", gmmpRule.getTimeUnit()));
+                    } else {
+                        smartRule.setOperand(new Time(amountOfTime, timeUnit));
+                    }
                 }
             } else {
                 log(errorLog, String.format("Invalid field \"%d\" in GMMP rule:\n%s", field, gmmpRule));
             }
-
+            if (smartRule.getOperator() == null) {
+                log(errorLog, String.format("Invalid combination of field \"%d\" (%s) and operator \"%d\" in rule:\n%s", field,
+                    smartRule.getField(), gmmpRule.getOperator(), gmmpRule));
+                continue;
+            }
             result.getRules().add(smartRule);
         }
 
@@ -222,10 +243,11 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
             }
             final Object operand = smartRule.getOperand();
             if (operand instanceof String) {
-                gmmpRule.setValue((String)operand);
+                gmmpRule.setValue((String) operand);
                 gmmpRule.setTimeUnit(TIME_UNIT_MAP.inverse().get(null));
             } else if (operand instanceof Time) {
-                final Time time = (Time)operand;
+                final Time time = (Time) operand;
+                // GMMP only supports time units up to days (does not support weeks)
                 final Pair<Integer, Time.TimeUnit> timePair = time.getLargestUnit(Time.TimeUnit.DAYS);
                 gmmpRule.setValue(timePair.getFirst().toString());
                 gmmpRule.setTimeUnit(TIME_UNIT_MAP.inverse().get(timePair.getSecond()));

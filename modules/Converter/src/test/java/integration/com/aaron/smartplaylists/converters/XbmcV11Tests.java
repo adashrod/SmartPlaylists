@@ -24,7 +24,7 @@ public class XbmcV11Tests {
         final File file = new File(TEST_PLAYLIST_DIRECTORY + filename);
         final FormattedSmartPlaylist playlist = xbmcV11PlaylistConverter.readFromFile(file);
         xbmcV11PlaylistConverter.convert(playlist, errorLog);
-        assertEquals(errorLog.size(), expectedErrorCount);
+        assertEquals(expectedErrorCount, errorLog.size());
     }
 
     @Before
