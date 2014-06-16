@@ -11,9 +11,9 @@ import java.util.Collection;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * deserialization integration tests for the v11 converter
+ * integration tests for the v11 converter (XBMC format -> Agnostic)
  */
-public class XbmcV11DeserializationTests {
+public class XbmcV11ConversionToAgnosticTests {
     private final String TEST_PLAYLIST_DIRECTORY = "./modules/Converter/src/test/resources/";
 
     private final XbmcV11PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
@@ -50,5 +50,15 @@ public class XbmcV11DeserializationTests {
     @Test
     public void oneInvalidOperator() throws Exception {
         testAFile("xbmc11/1_invalid_operator.xsp", 1);
+    }
+
+    @Test
+    public void validPlaylist1() throws Exception {
+        testAFile("xbmc11/valid_playlist1.xsp", 0);
+    }
+
+    @Test
+    public void validPlaylist2() throws Exception {
+        testAFile("xbmc11/valid_playlist2.xsp", 0);
     }
 }

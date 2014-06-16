@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="songs">
+    <name>Early (Original) Metallica</name>
+    <match>all</match>
+    <rule field="artist" operator="is">Metallica</rule>
+    <rule field="year" operator="lessthan">1991</rule>
+    <rule field="album" operator="isnot">The $5.98 E.P.: Garage Days, Re-Revisited</rule>
+</smartplaylist>

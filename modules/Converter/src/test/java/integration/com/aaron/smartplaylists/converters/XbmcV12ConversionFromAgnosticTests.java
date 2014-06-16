@@ -13,9 +13,9 @@ import java.util.Collection;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * deserialization integration tests for the v12 converter
+ * integration tests for the v12 converter (Agnostic -> XBMC)
  */
-public class XbmcV12SerializationTests {
+public class XbmcV12ConversionFromAgnosticTests {
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
 
     private final Collection<String> errorLog = Lists.newArrayList();

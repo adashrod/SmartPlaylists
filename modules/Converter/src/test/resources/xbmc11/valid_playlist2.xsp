@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="songs">
+    <name>Early Swing I haven't recently listened to</name>
+    <match>all</match>
+    <rule field="lastplayed" operator="notinthelast">1 week</rule>
+    <rule field="genre" operator="is">Swing</rule>
+    <rule field="year" operator="lessthan">1940</rule>
+</smartplaylist>

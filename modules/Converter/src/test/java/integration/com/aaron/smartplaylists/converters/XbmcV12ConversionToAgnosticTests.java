@@ -11,9 +11,9 @@ import java.util.Collection;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * deserialization integration tests for the v12 converter
+ * integration tests for the v12 converter (XBMC format -> Agnostic)
  */
-public class XbmcV12DeserializationTests {
+public class XbmcV12ConversionToAgnosticTests {
     private final String TEST_PLAYLIST_DIRECTORY = "./modules/Converter/src/test/resources/";
 
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
