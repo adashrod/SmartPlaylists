@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="songs">
+    <name>A TEST</name>
+    <match>one</match>
+    <order direction="ascending">playlist</order>
+    <rule field="year" operator="isnot">
+        <value>2000</value>
+    </rule>
+</smartplaylist>

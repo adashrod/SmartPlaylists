@@ -11,9 +11,9 @@ import java.util.Collection;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * integration tests for the v11 converter
+ * deserialization integration tests for the v11 converter
  */
-public class XbmcV11Tests {
+public class XbmcV11DeserializationTests {
     private final String TEST_PLAYLIST_DIRECTORY = "./modules/Converter/src/test/resources/";
 
     private final XbmcV11PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
@@ -34,21 +34,21 @@ public class XbmcV11Tests {
 
     @Test
     public void oneInvalidDate() throws Exception {
-        testAFile("xbmc11_1_invalid_date.xsp", 1);
+        testAFile("xbmc11/1_invalid_date.xsp", 1);
     }
 
     @Test
     public void twoInvalidTimes() throws Exception {
-        testAFile("xbmc11_2_invalid_times.xsp", 2);
+        testAFile("xbmc11/2_invalid_times.xsp", 2);
     }
 
     @Test
     public void oneInvalidField() throws Exception {
-        testAFile("xbmc11_1_invalid_field.xsp", 1);
+        testAFile("xbmc11/1_invalid_field.xsp", 1);
     }
 
     @Test
     public void oneInvalidOperator() throws Exception {
-        testAFile("xbmc11_1_invalid_operator.xsp", 1);
+        testAFile("xbmc11/1_invalid_operator.xsp", 1);
     }
 }
