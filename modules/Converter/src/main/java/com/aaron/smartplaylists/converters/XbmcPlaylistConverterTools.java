@@ -82,7 +82,6 @@ public class XbmcPlaylistConverterTools {
         TIME_UNIT_MAP.put(Time.TimeUnit.HOURS, "hours");
         TIME_UNIT_MAP.put(Time.TimeUnit.DAYS, "days");
         TIME_UNIT_MAP.put(Time.TimeUnit.WEEKS, "weeks");
-        // todo: order by doesn't support playlist
 
         STRING_FIELD_KEYS = STRING_FIELD_MAP.keySet();
         NUMBER_FIELD_KEYS = NUMBER_FIELD_MAP.keySet();
@@ -186,7 +185,13 @@ public class XbmcPlaylistConverterTools {
         }
         final Order order = new Order();
         order.setAscending(getOrderFromXbmc(direction));
-        order.setKey(STRING_FIELD_MAP.get(sortKey));
+        final MetadataField orderType = STRING_FIELD_MAP.get(sortKey);
+        if (orderType != MetadataField.PLAYLIST) {
+            order.setKey(orderType);
+        } else {
+            log(errorLog, "order by playlist is not allowed in XBMC playlists");
+            order.setKey(MetadataField.TITLE);
+        }
         result.setOrder(order);
 
         result.setLimit(xbmcSmartPlaylist.getLimit());
