@@ -1,5 +1,6 @@
 package com.aaron.smartplaylists.converters;
 
+import com.aaron.smartplaylists.PlaylistType;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.aaron.smartplaylists.MetadataField;
 import com.aaron.smartplaylists.Operator;
@@ -25,11 +26,11 @@ import java.util.Set;
  * The meat of XBMC playlist conversion. Since v11 and v12 XBMC playlists have an identical java API, the only
  * difference needed to handle the two separately is casting them when passing to functions in this class.
  * todo: make sure that <limit>0</limit> doesn't cause problems
- * todo: serialize playlist type
  */
 public class XbmcPlaylistConverterTools {
     private static final Logger logger = Logger.getLogger(XbmcPlaylistConverterTools.class);
 
+    private static final BiMap<String, PlaylistType> PLAYLIST_TYPE_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> STRING_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> NUMBER_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> DATE_FIELD_MAP = HashBiMap.create();
@@ -47,6 +48,10 @@ public class XbmcPlaylistConverterTools {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
     static {
+        PLAYLIST_TYPE_MAP.put("songs", PlaylistType.MUSIC);
+        PLAYLIST_TYPE_MAP.put("artists", PlaylistType.ARTISTS);
+        PLAYLIST_TYPE_MAP.put("albums", PlaylistType.ALBUMS);
+        PLAYLIST_TYPE_MAP.put("mixed", PlaylistType.MIXED);
         STRING_FIELD_MAP.put("artist", MetadataField.ARTIST);
         STRING_FIELD_MAP.put("albumartist", MetadataField.ALBUM_ARTIST);
         STRING_FIELD_MAP.put("title", MetadataField.TITLE);
@@ -150,6 +155,7 @@ public class XbmcPlaylistConverterTools {
     public static AgnosticSmartPlaylist convert(final XbmcSmartPlaylist xbmcSmartPlaylist,
             final Collection<String> errorLog) {
         final AgnosticSmartPlaylist result = new AgnosticSmartPlaylist();
+        result.setPlaylistType(PLAYLIST_TYPE_MAP.get(xbmcSmartPlaylist.getType()));
         result.setName(xbmcSmartPlaylist.getName());
         result.setMatchAll(getMatchAllFromXbmc(xbmcSmartPlaylist.getMatch()));
 
@@ -266,6 +272,7 @@ public class XbmcPlaylistConverterTools {
             log(errorLog, String.format("Unable to instantiate an XBMC playlist; check the constructors: %s", e.getMessage()));
             return null;
         }
+        result.setType(PLAYLIST_TYPE_MAP.inverse().get(agnosticSmartPlaylist.getPlaylistType()));
         result.setName(agnosticSmartPlaylist.getName());
         result.setMatch(getMatchAllForXbmc(agnosticSmartPlaylist.isMatchAll()));
 

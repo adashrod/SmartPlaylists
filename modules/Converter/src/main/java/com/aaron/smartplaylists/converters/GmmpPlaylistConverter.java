@@ -4,6 +4,7 @@ import com.aaron.smartplaylists.MetadataField;
 import com.aaron.smartplaylists.Operator;
 import com.aaron.smartplaylists.Order;
 import com.aaron.smartplaylists.Pair;
+import com.aaron.smartplaylists.PlaylistType;
 import com.aaron.smartplaylists.Rule;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.aaron.smartplaylists.Time;
@@ -131,12 +132,12 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
      * This takes in a {@link GmmpSmartPlaylist} and converts it to an {@link AgnosticSmartPlaylist}
      * @param formattedSmartPlaylist the GMMP playlist to convert
      * @return the converted format-agnostic playlist
-     * todo: set playlist type to songs
      */
     public AgnosticSmartPlaylist convert(final FormattedSmartPlaylist formattedSmartPlaylist,
             final Collection<String> errorLog) {
         final AgnosticSmartPlaylist result = new AgnosticSmartPlaylist();
-        final GmmpSmartPlaylist gmmpSmartPlaylist = (GmmpSmartPlaylist)formattedSmartPlaylist;
+        final GmmpSmartPlaylist gmmpSmartPlaylist = (GmmpSmartPlaylist) formattedSmartPlaylist;
+        result.setPlaylistType(PlaylistType.MUSIC);
         result.setName(gmmpSmartPlaylist.getName());
         result.setMatchAll(gmmpSmartPlaylist.isMatchAll());
         result.setLimit(gmmpSmartPlaylist.getLimit());
