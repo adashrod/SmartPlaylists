@@ -6,10 +6,13 @@ This program can be used on the command line or in a GUI to convert between vari
 Support
 -------
 Currently it supports XBMC (music) smart playlists versions 11 and 12:
+
 http://wiki.xbmc.org/?title=Smart_playlists
 
 and GoneMad Media Player smart playlists (up to v 1.5.0.5):
+
 https://play.google.com/store/apps/details?id=gonemad.gmmp
+
 http://gonemadmusicplayer.blogspot.com/2012/12/a-look-at-smart-playlists.html
 
 It hasn't yet been tested with XBMC version 13 or versions below 11.
@@ -26,6 +29,7 @@ Usage
 -----
 Building and Running
 The ant task "build.all" will build the jars and put everything into {project root}/antout. SmartPlaylists.jar can be run from the command line the following ways:
+
 `java -jar SmartPlaylists.jar`    (runs the GUI)
 
 `java -jar SmartPlaylists.jar -h` (running with any arguments will run the CLI, "-h" displays the help text)
