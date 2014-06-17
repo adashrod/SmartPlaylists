@@ -1,8 +1,8 @@
 package com.aaron.smartplaylists.converters;
 
-import com.aaron.smartplaylists.MetadataField;
-import com.aaron.smartplaylists.Operator;
-import com.aaron.smartplaylists.Rule;
+import com.aaron.smartplaylists.playlists.MetadataField;
+import com.aaron.smartplaylists.playlists.Operator;
+import com.aaron.smartplaylists.playlists.Rule;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.google.common.collect.Lists;
 import org.junit.Before;

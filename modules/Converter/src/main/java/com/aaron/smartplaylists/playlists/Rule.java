@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.playlists;
 
 /**
  * A Rule determines whether or not media should be included in a playlist. It specifies a metadata field, an operator,

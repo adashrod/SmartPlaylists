@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.playlists;
 
 /**
  * These are the operators that can be used for rules

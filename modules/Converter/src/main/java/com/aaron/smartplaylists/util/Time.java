@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.util;
 
 import com.google.common.collect.Maps;
 

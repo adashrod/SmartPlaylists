@@ -1,7 +1,5 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.api;
 
-import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.aaron.smartplaylists.api.PlaylistConverter;
 import com.aaron.smartplaylists.converters.GmmpPlaylistConverter;
 import com.aaron.smartplaylists.converters.XbmcV12PlaylistConverter;
 import com.aaron.smartplaylists.converters.XbmcV11PlaylistConverter;

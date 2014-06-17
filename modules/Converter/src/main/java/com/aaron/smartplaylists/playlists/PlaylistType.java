@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.playlists;
 
 /**
  * an enum for the different types of playlists that can exist

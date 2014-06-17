@@ -1,8 +1,5 @@
 package com.aaron.smartplaylists.playlists;
 
-import com.aaron.smartplaylists.Order;
-import com.aaron.smartplaylists.PlaylistType;
-import com.aaron.smartplaylists.Rule;
 import com.aaron.smartplaylists.api.SmartPlaylist;
 import com.google.common.collect.Lists;
 

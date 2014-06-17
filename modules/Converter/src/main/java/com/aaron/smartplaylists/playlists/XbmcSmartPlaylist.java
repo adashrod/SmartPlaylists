@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists.api;
+package com.aaron.smartplaylists.playlists;
 
 import java.util.List;
 

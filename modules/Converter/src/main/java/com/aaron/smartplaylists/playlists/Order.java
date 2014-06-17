@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.playlists;
 
 /**
  * An order defines how a playlist is sorted.

@@ -3,7 +3,7 @@ package com.aaron.smartplaylists.converters;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
 import com.aaron.smartplaylists.api.PlaylistConverter;
-import com.aaron.smartplaylists.api.XbmcSmartPlaylist;
+import com.aaron.smartplaylists.playlists.XbmcSmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV11SmartPlaylist;
 
 import javax.xml.bind.JAXBContext;

@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.util;
 
 /**
  * A parameterized object that contains two objects

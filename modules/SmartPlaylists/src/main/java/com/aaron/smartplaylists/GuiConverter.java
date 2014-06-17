@@ -1,5 +1,6 @@
 package com.aaron.smartplaylists;
 
+import com.aaron.smartplaylists.api.ConverterApi;
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
 import com.aaron.smartplaylists.guicomponent.PreferencesWindow;
 import com.aaron.smartplaylists.guicomponent.DirectoryTree;

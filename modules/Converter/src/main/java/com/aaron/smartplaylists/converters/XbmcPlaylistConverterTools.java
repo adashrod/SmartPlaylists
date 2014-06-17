@@ -1,14 +1,14 @@
 package com.aaron.smartplaylists.converters;
 
-import com.aaron.smartplaylists.PlaylistType;
+import com.aaron.smartplaylists.playlists.PlaylistType;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
-import com.aaron.smartplaylists.MetadataField;
-import com.aaron.smartplaylists.Operator;
-import com.aaron.smartplaylists.Order;
-import com.aaron.smartplaylists.Pair;
-import com.aaron.smartplaylists.Rule;
-import com.aaron.smartplaylists.Time;
-import com.aaron.smartplaylists.api.XbmcSmartPlaylist;
+import com.aaron.smartplaylists.playlists.MetadataField;
+import com.aaron.smartplaylists.playlists.Operator;
+import com.aaron.smartplaylists.playlists.Order;
+import com.aaron.smartplaylists.util.Pair;
+import com.aaron.smartplaylists.playlists.Rule;
+import com.aaron.smartplaylists.util.Time;
+import com.aaron.smartplaylists.playlists.XbmcSmartPlaylist;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;

@@ -1,14 +1,14 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.util;
 
 import org.junit.Test;
 
 import java.text.ParseException;
 
-import static com.aaron.smartplaylists.Time.TimeUnit.DAYS;
-import static com.aaron.smartplaylists.Time.TimeUnit.HOURS;
-import static com.aaron.smartplaylists.Time.TimeUnit.MINUTES;
-import static com.aaron.smartplaylists.Time.TimeUnit.SECONDS;
-import static com.aaron.smartplaylists.Time.TimeUnit.WEEKS;
+import static com.aaron.smartplaylists.util.Time.TimeUnit.DAYS;
+import static com.aaron.smartplaylists.util.Time.TimeUnit.HOURS;
+import static com.aaron.smartplaylists.util.Time.TimeUnit.MINUTES;
+import static com.aaron.smartplaylists.util.Time.TimeUnit.SECONDS;
+import static com.aaron.smartplaylists.util.Time.TimeUnit.WEEKS;
 import static junit.framework.Assert.assertEquals;
 
 /**

@@ -1,7 +1,6 @@
 package com.aaron.smartplaylists.playlists;
 
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.aaron.smartplaylists.api.XbmcSmartPlaylist;
 import com.google.common.collect.Lists;
 
 import javax.xml.bind.JAXBContext;

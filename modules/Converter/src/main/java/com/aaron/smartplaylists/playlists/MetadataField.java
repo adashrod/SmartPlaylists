@@ -1,4 +1,4 @@
-package com.aaron.smartplaylists;
+package com.aaron.smartplaylists.playlists;
 
 /**
  * These are all of the different types of metadata fields that can be used for rules and ordering. Note: RANDOM should
