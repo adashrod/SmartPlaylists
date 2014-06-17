@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SmartPlaylists" default="run" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <target name="compile.converter" description="compiles the Converter module, which is the API">
+        <mkdir dir="build/Converter"/>
+        <javac destdir="build/Converter" includeantruntime="false">
+            <classpath>
+                <pathelement location="lib/guava-10.0.1.jar"/>
+                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="lib/junit-4.8.jar"/>
+            </classpath>
+            <src path="modules/Converter/src/main/java"/>
+        </javac>
+
+        <copy todir="build/Converter">
+             <fileset dir="modules/Converter/src/main/resources/"/>
+        </copy>
+    </target>
+
+    <target name="compile.smartplaylists" depends="compile.converter"
+            description="compiles the SmartPlaylists module, which is the main program">
+        <mkdir dir="build/SmartPlaylists"/>
+        <javac destdir="build/SmartPlaylists" includeantruntime="false">
+            <classpath>
+                <pathelement location="lib/guava-10.0.1.jar"/>
+                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="lib/commons-cli-1.2.jar"/>
+                <pathelement location="antout/Converter.jar"/>
+            </classpath>
+            <src path="modules/SmartPlaylists/src/main/java"/>
+        </javac>
+
+        <copy todir="build/SmartPlaylists">
+             <fileset dir="modules/SmartPlaylists/src/main/resources"/>
+        </copy>
+    </target>
+
+    <target name="jar.converter" depends="compile.converter"
+            description="creates a jar from the Converter module">
+        <mkdir dir="antout"/>
+        <jar destfile="antout/Converter.jar" basedir="build/Converter" manifest="modules/Converter/src/main/resources/META-INF/MANIFEST.MF"/>
+    </target>
+
+    <target name="jar.smartplaylists" depends="jar.converter, compile.smartplaylists"
+            description="creates a jar from the SmartPlaylists module">
+        <jar destfile="antout/SmartPlaylists.jar" basedir="build/SmartPlaylists" manifest="modules/SmartPlaylists/src/main/resources/META-INF/MANIFEST.MF"/>
+    </target>
+
+    <target name="copy.lib" description="copies 3rd-party jars to the output dir">
+        <copy todir="antout">
+            <fileset dir="lib" includes="*.jar"/>
+        </copy>
+    </target>
+
+    <target name="build.all" depends="jar.smartplaylists, copy.lib"
+            description="compiles, creates jars, and copies 3rd-party jars">
+        <chmod file="antout/SmartPlaylists.jar" perm="ugo+x"/>
+    </target>
+
+    <target name="run" depends="build.all" description="builds everything and runs the GUI">
+        <java jar="antout/SmartPlaylists.jar" failonerror="true" fork="true"/>
+    </target>
+
+    <target name="clean" description="deletes all build artifacts">
+        <delete dir="build"/>
+        <delete dir="antout"/>
+    </target>
+</project>

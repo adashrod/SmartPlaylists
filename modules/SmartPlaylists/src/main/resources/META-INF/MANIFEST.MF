@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Class-Path: guava-10.0.1.jar log4j-log4j-1.2.15.jar commons-cli-1.2.ja
- r
+Class-Path: guava-10.0.1.jar log4j-log4j-1.2.15.jar commons-cli-1.2.jar Converter.jar
 Main-Class: com.aaron.smartplaylists.EntryPoint
 
