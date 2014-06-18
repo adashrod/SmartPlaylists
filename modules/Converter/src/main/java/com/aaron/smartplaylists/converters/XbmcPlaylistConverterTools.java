@@ -227,7 +227,6 @@ public class XbmcPlaylistConverterTools {
         } else if (DATE_FIELD_VALUES.contains(smartField)) {
             xbmcRule.setField(DATE_FIELD_MAP.inverse().get(smartField));
         } else {
-            // todo: make a test for this using a SmartPlaylist with discnumber
             throw new IllegalArgumentException(String.format("XBMC playlists do not support the \"%s\" field", smartField));
         }
         if (xbmcRule.getOperator() == null) {
