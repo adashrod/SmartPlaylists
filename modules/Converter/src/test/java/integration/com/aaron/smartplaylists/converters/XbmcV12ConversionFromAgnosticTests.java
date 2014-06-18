@@ -4,10 +4,10 @@ import com.aaron.smartplaylists.playlists.MetadataField;
 import com.aaron.smartplaylists.playlists.Operator;
 import com.aaron.smartplaylists.playlists.Rule;
 import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
-import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static junit.framework.Assert.assertEquals;
@@ -18,7 +18,7 @@ import static junit.framework.Assert.assertEquals;
 public class XbmcV12ConversionFromAgnosticTests {
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
 
-    private final Collection<String> errorLog = Lists.newArrayList();
+    private final Collection<String> errorLog = new ArrayList<String>();
 
     @Before
     public void before() {

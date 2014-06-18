@@ -6,7 +6,6 @@
             <classpath>
                 <pathelement location="lib/guava-10.0.1.jar"/>
                 <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
-                <pathelement location="lib/junit-4.8.jar"/>
             </classpath>
             <src path="modules/Converter/src/main/java"/>
         </javac>
@@ -14,6 +13,12 @@
         <copy todir="build/Converter">
              <fileset dir="modules/Converter/src/main/resources/"/>
         </copy>
+    </target>
+
+    <target name="jar.converter" depends="compile.converter"
+            description="creates a jar from the Converter module">
+        <mkdir dir="antout"/>
+        <jar destfile="antout/Converter.jar" basedir="build/Converter" manifest="modules/Converter/src/main/resources/META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="compile.smartplaylists" depends="compile.converter"
@@ -32,12 +37,6 @@
         <copy todir="build/SmartPlaylists">
              <fileset dir="modules/SmartPlaylists/src/main/resources"/>
         </copy>
-    </target>
-
-    <target name="jar.converter" depends="compile.converter"
-            description="creates a jar from the Converter module">
-        <mkdir dir="antout"/>
-        <jar destfile="antout/Converter.jar" basedir="build/Converter" manifest="modules/Converter/src/main/resources/META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="jar.smartplaylists" depends="jar.converter, compile.smartplaylists"
@@ -59,6 +58,73 @@
     <target name="run" depends="build.all" description="builds everything and runs the GUI">
         <java jar="antout/SmartPlaylists.jar" failonerror="true" fork="true"/>
     </target>
+
+    <target name="compile.converter.test.unit" depends="jar.converter" description="compiles the Converter module unit tests">
+        <mkdir dir="build/test/Converter/unit"/>
+        <javac destdir="build/test/Converter/unit" includeantruntime="false">
+            <classpath>
+                <pathelement location="antout/Converter.jar"/>
+                <pathelement location="lib/junit-4.8.jar"/>
+            </classpath>
+            <src path="modules/Converter/src/test/java/unit"/>
+        </javac>
+
+        <copy todir="build/test/Converter/unit">
+             <fileset dir="modules/Converter/src/test/resources/"/>
+        </copy>
+    </target>
+
+    <target name="compile.converter.test.integration" depends="jar.converter" description="compiles the Converter module integration tests">
+        <mkdir dir="build/test/Converter/integration"/>
+        <javac destdir="build/test/Converter/integration" includeantruntime="false">
+            <classpath>
+                <pathelement location="antout/Converter.jar"/>
+                <pathelement location="lib/junit-4.8.jar"/>
+            </classpath>
+            <src path="modules/Converter/src/test/java/integration"/>
+        </javac>
+
+        <copy todir="build/test/Converter/integration">
+             <fileset dir="modules/Converter/src/test/resources/"/>
+        </copy>
+    </target>
+
+    <target name="test.unit.run" depends="compile.converter.test.unit" description="Runs all of the unit tests">
+        <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
+               haltonerror="false" haltonfailure="false">
+            <classpath>
+                <pathelement location="lib/junit-4.8.jar"/>
+                <pathelement location="lib/guava-10.0.1.jar"/>
+                <pathelement location="antout/Converter.jar"/>
+                <pathelement location="build/test/Converter/unit"/>
+            </classpath>
+
+            <batchtest>
+                <fileset dir="build/test/Converter/unit" includes="**/*.class"/>
+            </batchtest>
+        </junit>
+        <fail if="testfailed" message="Some test(s) failed."/>
+    </target>
+
+    <target name="test.integration.run" depends="compile.converter.test.integration" description="Runs all of the integration tests">
+        <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
+               haltonerror="false" haltonfailure="false">
+            <classpath>
+                <pathelement location="lib/junit-4.8.jar"/>
+                <pathelement location="lib/guava-10.0.1.jar"/>
+                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="antout/Converter.jar"/>
+                <pathelement location="build/test/Converter/integration"/>
+            </classpath>
+
+            <batchtest>
+                <fileset dir="build/test/Converter/integration" includes="**/*.class"/>
+            </batchtest>
+        </junit>
+        <fail if="testfailed" message="Some test(s) failed."/>
+    </target>
+
+    <target name="test" depends="test.unit.run, test.integration.run" description="Runs all tests"/>
 
     <target name="clean" description="deletes all build artifacts">
         <delete dir="build"/>

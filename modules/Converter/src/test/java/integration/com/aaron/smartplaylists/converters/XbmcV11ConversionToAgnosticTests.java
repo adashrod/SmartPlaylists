@@ -1,11 +1,11 @@
 package com.aaron.smartplaylists.converters;
 
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static junit.framework.Assert.assertEquals;
@@ -18,7 +18,7 @@ public class XbmcV11ConversionToAgnosticTests {
 
     private final XbmcV11PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
 
-    private final Collection<String> errorLog = Lists.newArrayList();
+    private final Collection<String> errorLog = new ArrayList<String>();
 
     private void testAFile(final String filename, final int expectedErrorCount) throws Exception {
         final File file = new File(TEST_PLAYLIST_DIRECTORY + filename);
