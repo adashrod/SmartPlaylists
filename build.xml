@@ -1,91 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="SmartPlaylists" default="run" basedir=".">
+    <property name="lib" value="${basedir}/lib"/>
+    <property name="modules"                       value="${basedir}/modules"/>
+    <property name="modules.converter"             value="${modules}/Converter"/>
+    <property name="modules.smartplaylists"        value="${modules}/SmartPlaylists"/>
+
+    <!-- directories in the main source -->
+    <property name="converter.src"                 value="${modules.converter}/src"/>
+    <property name="converter.main.java"           value="${converter.src}/main/java"/>
+    <property name="converter.main.resources"      value="${converter.src}/main/resources"/>
+    <property name="smartplaylists.main"           value="${modules.smartplaylists}/src"/>
+    <property name="smartplaylists.main.java"      value="${smartplaylists.main}/main/java"/>
+    <property name="smartplaylists.main.resources" value="${smartplaylists.main}/main/resources"/>
+
+    <!-- directories in the test source -->
+    <property name="converter.test.java"             value="${converter.src}/test/java"/>
+    <property name="converter.test.java.unit"        value="${converter.test.java}/unit"/>
+    <property name="converter.test.java.integration" value="${converter.test.java}/integration"/>
+    <property name="converter.test.resources"        value="${converter.src}/test/resources"/>
+
+    <!-- build directories -->
+    <property name="build"                            value="${basedir}/build"/>
+    <property name="build.test"                       value="${build}/test"/>
+    <property name="converter.build"                  value="${build}/Converter"/>
+    <property name="smartplaylists.build"             value="${build}/SmartPlaylists"/>
+    <property name="converter.build.test"             value="${build.test}/converter"/>
+    <property name="converter.build.test.unit"        value="${converter.build.test}/unit"/>
+    <property name="converter.build.test.integration" value="${converter.build.test}/integration"/>
+
+    <!-- where to put the final jars and what to name them -->
+    <property name="app"                value="${basedir}/antout"/>
+    <property name="jar.converter"      value="Converter.jar"/>
+    <property name="jar.smartplaylists" value="SmartPlaylists.jar"/>
+
     <target name="compile.converter" description="compiles the Converter module, which is the API">
-        <mkdir dir="build/Converter"/>
-        <javac destdir="build/Converter" includeantruntime="false">
+        <mkdir dir="${converter.build}"/>
+        <javac destdir="${converter.build}" includeantruntime="false">
             <classpath>
-                <pathelement location="lib/guava-10.0.1.jar"/>
-                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="${lib}/guava-10.0.1.jar"/>
+                <pathelement location="${lib}/log4j-log4j-1.2.15.jar"/>
             </classpath>
-            <src path="modules/Converter/src/main/java"/>
+            <src path="${converter.main.java}"/>
         </javac>
 
-        <copy todir="build/Converter">
-             <fileset dir="modules/Converter/src/main/resources/"/>
+        <copy todir="${converter.build}">
+             <fileset dir="${converter.main.resources}"/>
         </copy>
     </target>
 
     <target name="jar.converter" depends="compile.converter"
             description="creates a jar from the Converter module">
-        <mkdir dir="antout"/>
-        <jar destfile="antout/Converter.jar" basedir="build/Converter" manifest="modules/Converter/src/main/resources/META-INF/MANIFEST.MF"/>
+        <mkdir dir="${app}"/>
+        <jar destfile="${app}/${jar.converter}" basedir="${converter.build}" manifest="${converter.main.resources}/META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="compile.smartplaylists" depends="compile.converter"
             description="compiles the SmartPlaylists module, which is the main program">
-        <mkdir dir="build/SmartPlaylists"/>
-        <javac destdir="build/SmartPlaylists" includeantruntime="false">
+        <mkdir dir="${smartplaylists.build}"/>
+        <javac destdir="${smartplaylists.build}" includeantruntime="false">
             <classpath>
-                <pathelement location="lib/guava-10.0.1.jar"/>
-                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
-                <pathelement location="lib/commons-cli-1.2.jar"/>
-                <pathelement location="antout/Converter.jar"/>
+                <pathelement location="${lib}/guava-10.0.1.jar"/>
+                <pathelement location="${lib}/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="${lib}/commons-cli-1.2.jar"/>
+                <pathelement location="${app}/${jar.converter}"/>
             </classpath>
-            <src path="modules/SmartPlaylists/src/main/java"/>
+            <src path="${smartplaylists.main.java}"/>
         </javac>
 
-        <copy todir="build/SmartPlaylists">
-             <fileset dir="modules/SmartPlaylists/src/main/resources"/>
+        <copy todir="${smartplaylists.build}">
+             <fileset dir="${smartplaylists.main.resources}"/>
         </copy>
     </target>
 
     <target name="jar.smartplaylists" depends="jar.converter, compile.smartplaylists"
             description="creates a jar from the SmartPlaylists module">
-        <jar destfile="antout/SmartPlaylists.jar" basedir="build/SmartPlaylists" manifest="modules/SmartPlaylists/src/main/resources/META-INF/MANIFEST.MF"/>
+        <jar destfile="${app}/${jar.smartplaylists}" basedir="${smartplaylists.build}" manifest="${smartplaylists.main.resources}/META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="copy.lib" description="copies 3rd-party jars to the output dir">
-        <copy todir="antout">
-            <fileset dir="lib" includes="*.jar"/>
+        <copy todir="${app}">
+            <fileset dir="${lib}" includes="*.jar"/>
         </copy>
     </target>
 
     <target name="build.all" depends="jar.smartplaylists, copy.lib"
             description="compiles, creates jars, and copies 3rd-party jars">
-        <chmod file="antout/SmartPlaylists.jar" perm="ugo+x"/>
+        <chmod file="${app}/${jar.smartplaylists}" perm="ugo+x"/>
     </target>
 
     <target name="run" depends="build.all" description="builds everything and runs the GUI">
-        <java jar="antout/SmartPlaylists.jar" failonerror="true" fork="true"/>
+        <java jar="${app}/${jar.smartplaylists}" failonerror="true" fork="true"/>
     </target>
 
     <target name="compile.converter.test.unit" depends="jar.converter" description="compiles the Converter module unit tests">
-        <mkdir dir="build/test/Converter/unit"/>
-        <javac destdir="build/test/Converter/unit" includeantruntime="false">
+        <mkdir dir="${converter.build.test.unit}"/>
+        <javac destdir="${converter.build.test.unit}" includeantruntime="false">
             <classpath>
-                <pathelement location="antout/Converter.jar"/>
-                <pathelement location="lib/junit-4.8.jar"/>
+                <pathelement location="${app}/${jar.converter}"/>
+                <pathelement location="${lib}/junit-4.8.jar"/>
             </classpath>
-            <src path="modules/Converter/src/test/java/unit"/>
+            <src path="${converter.test.java.unit}"/>
         </javac>
 
-        <copy todir="build/test/Converter/unit">
-             <fileset dir="modules/Converter/src/test/resources/"/>
+        <copy todir="${converter.build.test.unit}">
+             <fileset dir="${converter.test.resources}"/>
         </copy>
     </target>
 
     <target name="compile.converter.test.integration" depends="jar.converter" description="compiles the Converter module integration tests">
-        <mkdir dir="build/test/Converter/integration"/>
-        <javac destdir="build/test/Converter/integration" includeantruntime="false">
+        <mkdir dir="${converter.build.test.integration}"/>
+        <javac destdir="${converter.build.test.integration}" includeantruntime="false">
             <classpath>
-                <pathelement location="antout/Converter.jar"/>
-                <pathelement location="lib/junit-4.8.jar"/>
+                <pathelement location="${app}/${jar.converter}"/>
+                <pathelement location="${lib}/junit-4.8.jar"/>
             </classpath>
-            <src path="modules/Converter/src/test/java/integration"/>
+            <src path="${converter.test.java.integration}"/>
         </javac>
 
-        <copy todir="build/test/Converter/integration">
-             <fileset dir="modules/Converter/src/test/resources/"/>
+        <copy todir="${converter.build.test.integration}">
+             <fileset dir="${converter.test.resources}"/>
         </copy>
     </target>
 
@@ -93,14 +126,14 @@
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
             <classpath>
-                <pathelement location="lib/junit-4.8.jar"/>
-                <pathelement location="lib/guava-10.0.1.jar"/>
-                <pathelement location="antout/Converter.jar"/>
-                <pathelement location="build/test/Converter/unit"/>
+                <pathelement location="${lib}/junit-4.8.jar"/>
+                <pathelement location="${lib}/guava-10.0.1.jar"/>
+                <pathelement location="${app}/${jar.converter}"/>
+                <pathelement location="${converter.build.test.unit}"/>
             </classpath>
 
             <batchtest>
-                <fileset dir="build/test/Converter/unit" includes="**/*.class"/>
+                <fileset dir="${converter.build.test.unit}" includes="**/*.class"/>
             </batchtest>
         </junit>
         <fail if="testfailed" message="Some test(s) failed."/>
@@ -110,15 +143,15 @@
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
             <classpath>
-                <pathelement location="lib/junit-4.8.jar"/>
-                <pathelement location="lib/guava-10.0.1.jar"/>
-                <pathelement location="lib/log4j-log4j-1.2.15.jar"/>
-                <pathelement location="antout/Converter.jar"/>
-                <pathelement location="build/test/Converter/integration"/>
+                <pathelement location="${lib}/junit-4.8.jar"/>
+                <pathelement location="${lib}/guava-10.0.1.jar"/>
+                <pathelement location="${lib}/log4j-log4j-1.2.15.jar"/>
+                <pathelement location="${app}/${jar.converter}"/>
+                <pathelement location="${converter.build.test.integration}"/>
             </classpath>
 
             <batchtest>
-                <fileset dir="build/test/Converter/integration" includes="**/*.class"/>
+                <fileset dir="${converter.build.test.integration}" includes="**/*.class"/>
             </batchtest>
         </junit>
         <fail if="testfailed" message="Some test(s) failed."/>
@@ -127,7 +160,7 @@
     <target name="test" depends="test.unit.run, test.integration.run" description="Runs all tests"/>
 
     <target name="clean" description="deletes all build artifacts">
-        <delete dir="build"/>
-        <delete dir="antout"/>
+        <delete dir="${build}"/>
+        <delete dir="${app}"/>
     </target>
 </project>
