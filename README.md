@@ -25,6 +25,12 @@ It's dependent on the following jars and there is currently no dependency manage
 * junit-4.8.jar (JUnit for unit and integration tests)
 * commons-cli-1.2.jar (Apache CLI argument parser)
 
+Prerequisites
+-------------
+* Java SDK
+* ant, the Java-based make tool
+* all of the jar files listed in the previous section
+
 Usage
 -----
 Building and Running
