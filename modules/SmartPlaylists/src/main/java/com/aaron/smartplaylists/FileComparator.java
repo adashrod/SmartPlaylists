@@ -7,7 +7,7 @@ import java.util.Comparator;
  * A comparator for {@link java.io.File}s. It supports sorting by filenames and file types. There are static functions
  * for getting a comparator, e.g. FileComparator.name(), which returns one that does name comparisons. There are
  * convenience functions for setting options on a comparator that return the comparator,
- * e.g. FileComparator.name().caseInsensitive().descending(), which creates one that does case-insensite name comparisons
+ * e.g. FileComparator.name().caseInsensitive().descending(), which creates one that does case-insensitive name comparisons
  * in descending order.
  */
 public class FileComparator implements Comparator<File> {
@@ -74,7 +74,7 @@ public class FileComparator implements Comparator<File> {
         if (file1IsDir == file2IsDir) {
             return 0;
         }
-        if (file1IsDir && !file2IsDir) {
+        if (file1IsDir) {
             return -1;
         }
         return 1;
@@ -129,7 +129,7 @@ public class FileComparator implements Comparator<File> {
 
     /**
      * Set the comparator to do a descending sort (z-a)
-     * @return
+     * @return this
      */
     public FileComparator descending() {
         this.ascending = false;
