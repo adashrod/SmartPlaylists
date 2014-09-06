@@ -1,9 +1,8 @@
 package com.aaron.smartplaylists;
 
-import com.google.common.collect.Maps;
-
 import java.io.File;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,8 +14,8 @@ public enum FileListSortType {
     ASCENDING_TYPE,  // alphabetically by file extension (a-z)
     DESCENDING_TYPE; // reverse-alphabetically by file extension (a-z)
 
-    private static final Map<FileListSortType, FileListSortType> complements = Maps.newHashMap();
-    private static final Map<FileListSortType, Comparator<File>> complementComparators = Maps.newHashMap();
+    private static final Map<FileListSortType, FileListSortType> complements = new HashMap<>();
+    private static final Map<FileListSortType, Comparator<File>> complementComparators = new HashMap<>();
 
     static {
         complements.put(ASCENDING_NAME, DESCENDING_NAME);

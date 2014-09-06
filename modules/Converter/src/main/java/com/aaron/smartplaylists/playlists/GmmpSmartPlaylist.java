@@ -1,7 +1,6 @@
 package com.aaron.smartplaylists.playlists;
 
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.google.common.collect.Lists;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -12,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
     private final List<Rule> rules;
 
     public GmmpSmartPlaylist() {
-        rules = Lists.newArrayList();
+        rules = new ArrayList<>();
     }
 
     @XmlElement(name = "Version")

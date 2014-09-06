@@ -2,7 +2,6 @@ package com.aaron.smartplaylists.guicomponent;
 
 import com.aaron.smartplaylists.FileListSortType;
 import com.aaron.smartplaylists.guicomponent.event.PreferencesSaveListener;
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
 import javax.swing.BoxLayout;
@@ -23,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.EventListener;
 import java.util.List;
@@ -57,7 +57,7 @@ public class PreferencesWindow extends JDialog {
     private final JButton cancelButton = new JButton();
     private final JButton saveButton = new JButton();
 
-    private final List<EventListener> eventListeners = Lists.newArrayList();
+    private final List<EventListener> eventListeners = new ArrayList<>();
 
     /**
      * What the states of the buttons were the last time they were saved
@@ -68,28 +68,19 @@ public class PreferencesWindow extends JDialog {
      */
     private final BitSet currentButtonStates = new BitSet(6);
 
-    private final ActionListener optionButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            saveButtonStatesToBitSet(currentButtonStates);
-            saveButton.setEnabled(!oldButtonStates.equals(currentButtonStates));
-        }
+    private final ActionListener optionButtonClickListener = (final ActionEvent e) -> {
+        saveButtonStatesToBitSet(currentButtonStates);
+        saveButton.setEnabled(!oldButtonStates.equals(currentButtonStates));
     };
 
-    private final ActionListener cancelButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            loadButtonStatesFromBitSet(oldButtonStates);
-            setVisible(false);
-        }
+    private final ActionListener cancelButtonClickListener = (final ActionEvent e) -> {
+        loadButtonStatesFromBitSet(oldButtonStates);
+        setVisible(false);
     };
 
-    private final ActionListener saveButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            persistConfig();
-            setVisible(false);
-        }
+    private final ActionListener saveButtonClickListener = (final ActionEvent e) -> {
+        persistConfig();
+        setVisible(false);
     };
 
     /**
@@ -209,11 +200,10 @@ public class PreferencesWindow extends JDialog {
     }
 
     private void fireOnSave() {
-        for (final EventListener listener: eventListeners) {
-            if (listener instanceof PreferencesSaveListener) {
-                ((PreferencesSaveListener) listener).onSave();
-            }
-        }
+        eventListeners.stream()
+            .filter(listener -> listener instanceof PreferencesSaveListener)
+                .forEach(listener ->
+                    ((PreferencesSaveListener) listener).onSave());
     }
 
     private void createGui() {
@@ -274,10 +264,6 @@ public class PreferencesWindow extends JDialog {
 
     public PreferencesWindow(final JFrame parent) {
         super(parent);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createGui();
-            }
-        });
+        SwingUtilities.invokeLater(this::createGui);
     }
 }

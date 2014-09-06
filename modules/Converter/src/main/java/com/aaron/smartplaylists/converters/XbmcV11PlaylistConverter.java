@@ -10,7 +10,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -33,13 +32,7 @@ public class XbmcV11PlaylistConverter implements PlaylistConverter {
     public FormattedSmartPlaylist readFromFile(final File file) throws JAXBException, FileNotFoundException {
         final JAXBContext context = JAXBContext.newInstance(XbmcV11SmartPlaylist.class);
         final Unmarshaller unmarshaller = context.createUnmarshaller();
-        unmarshaller.setEventHandler(new ValidationEventHandler() {
-            @Override
-            public boolean handleEvent(final ValidationEvent event) {
-                // in case this is validating an XBMC12 against the XBMC11 schema, an "unexpected element" warning (for a <value/> inside a <rule/> wouldn't cause a JAXBException, so enforce that restriction here
-                return !event.getMessage().contains("unexpected element");
-            }
-        });
+        unmarshaller.setEventHandler((final ValidationEvent event) -> !event.getMessage().contains("unexpected element"));
         return (XbmcV11SmartPlaylist) unmarshaller.unmarshal(new FileReader(file));
     }
 

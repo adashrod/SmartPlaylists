@@ -11,7 +11,6 @@ import com.aaron.smartplaylists.util.Time;
 import com.aaron.smartplaylists.playlists.XbmcSmartPlaylist;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import java.text.DateFormat;
@@ -19,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +37,7 @@ public class XbmcPlaylistConverterTools {
     private static final BiMap<String, Operator> STRING_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> NUMBER_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> DATE_OPERATOR_MAP = HashBiMap.create();
-    private static final Map<Time.TimeUnit, String> TIME_UNIT_MAP = Maps.newHashMap();
+    private static final Map<Time.TimeUnit, String> TIME_UNIT_MAP = new HashMap<>();
     private static final Set<String> STRING_FIELD_KEYS;
     private static final Set<String> NUMBER_FIELD_KEYS;
     private static final Set<String> DATE_FIELD_KEYS;

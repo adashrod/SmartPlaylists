@@ -1,8 +1,7 @@
 package com.aaron.smartplaylists.util;
 
-import com.google.common.collect.Maps;
-
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -233,15 +232,15 @@ public class Time {
 
         deNormalize(TimeUnit.min(largestAllowed, highestResolutionNecessary));
         if (weeks != 0) {
-            return new Pair<Integer, TimeUnit>(weeks, TimeUnit.WEEKS);
+            return new Pair<>(weeks, TimeUnit.WEEKS);
         } else if (days != 0) {
-            return new Pair<Integer, TimeUnit>(days, TimeUnit.DAYS);
+            return new Pair<>(days, TimeUnit.DAYS);
         } else if (hours != 0) {
-            return new Pair<Integer, TimeUnit>(hours, TimeUnit.HOURS);
+            return new Pair<>(hours, TimeUnit.HOURS);
         } else if (minutes != 0) {
-            return new Pair<Integer, TimeUnit>(minutes, TimeUnit.MINUTES);
+            return new Pair<>(minutes, TimeUnit.MINUTES);
         } else {
-            return new Pair<Integer, TimeUnit>(seconds, TimeUnit.SECONDS);
+            return new Pair<>(seconds, TimeUnit.SECONDS);
         }
     }
 
@@ -321,7 +320,7 @@ public class Time {
         WEEKS(4);
 
         private final int rank;
-        private final static Map<String, TimeUnit> TIME_UNIT_MAP = Maps.newHashMap();
+        private final static Map<String, TimeUnit> TIME_UNIT_MAP = new HashMap<>();
 
         static {
             TIME_UNIT_MAP.put("second", SECONDS);

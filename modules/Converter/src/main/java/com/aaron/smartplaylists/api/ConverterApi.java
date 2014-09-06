@@ -7,14 +7,15 @@ import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.aaron.smartplaylists.playlists.GmmpSmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV12SmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV11SmartPlaylist;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,11 +29,11 @@ public class ConverterApi {
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
     private final GmmpPlaylistConverter gmmpPlaylistConverter = new GmmpPlaylistConverter();
 
-    private final Map<Class<? extends FormattedSmartPlaylist>, PlaylistConverter> classConverterMap = Maps.newHashMap();
+    private final Map<Class<? extends FormattedSmartPlaylist>, PlaylistConverter> classConverterMap = new HashMap<>();
 
-    private final Deque<PlaylistConverter> converters = Lists.newLinkedList();
+    private final Deque<PlaylistConverter> converters = new LinkedList<>();
 
-    private final List<String> errorLog = Lists.newArrayList();
+    private final List<String> errorLog = new ArrayList<>();
 
     public ConverterApi() {
         converters.add(xbmcV12PlaylistConverter);

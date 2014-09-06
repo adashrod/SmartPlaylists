@@ -10,7 +10,6 @@ import com.aaron.smartplaylists.guicomponent.event.PreferencesSaveListener;
 import com.aaron.smartplaylists.playlists.GmmpSmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV11SmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV12SmartPlaylist;
-import com.google.common.collect.Maps;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -27,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
@@ -41,7 +41,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,8 +63,8 @@ public class GuiConverter extends JFrame {
     private final DirectoryTree directoryTree = new DirectoryTree();
     private final JButton sortByNameButton = new JButton();
     private final JButton sortByTypeButton = new JButton();
-    private final DefaultListModel fileListModel = new DefaultListModel();
-    private final JList fileList = new JList(fileListModel);
+    private final DefaultListModel<File> fileListModel = new DefaultListModel<>();
+    private final JList<File> fileList = new JList<>(fileListModel);
     private final JRadioButton xbmc11RadioButton = new JRadioButton();
     private final JRadioButton xbmcRadioButton = new JRadioButton();
     private final JRadioButton gmmpRadioButton = new JRadioButton();
@@ -81,7 +81,7 @@ public class GuiConverter extends JFrame {
     private static final Comparator<File> sortFilesByType = FileComparator.type().ascending().caseInsensitive();
 
     private OutputType outputType;
-    private static final Map<OutputType, Class<? extends FormattedSmartPlaylist>> outputTypeMap = Maps.newHashMap();
+    private static final Map<OutputType, Class<? extends FormattedSmartPlaylist>> outputTypeMap = new HashMap<>();
     static {
         outputTypeMap.put(OutputType.XBMC11, XbmcV11SmartPlaylist.class);
         outputTypeMap.put(OutputType.XBMC12, XbmcV12SmartPlaylist.class);
@@ -112,146 +112,112 @@ public class GuiConverter extends JFrame {
      * Updates the value in the text field to reflect the currently selected directory and refreshes the list of files
      * displayed.
      */
-    private final DirectoryTreeSelectionListener directoryTreeSelectionListener = new DirectoryTreeSelectionListener() {
-        public void onSelect(final File dir) {
-            final File currentFile = new File(currentDirectoryField.getText());
-            try {
-                if (!currentFile.getCanonicalPath().equals(dir.getCanonicalPath())) {
-                    currentDirectoryField.setText(dir.getPath());
-                    currentDirectoryField.setBackground(Color.WHITE);
-                    currentDirectoryField.setForeground(Color.BLACK);
-                }
-            } catch (final IOException ignored) {}
-            fileListModel.removeAllElements();
-            final File[] files = dir.listFiles(new FileFilter() {
-                public boolean accept(final File file) {
-                    if (file.isDirectory()) {
-                        return false;
+    private final DirectoryTreeSelectionListener directoryTreeSelectionListener = (final File dir) -> {
+        final File currentFile = new File(currentDirectoryField.getText());
+        try {
+            if (!currentFile.getCanonicalPath().equals(dir.getCanonicalPath())) {
+                currentDirectoryField.setText(dir.getPath());
+                currentDirectoryField.setBackground(Color.WHITE);
+                currentDirectoryField.setForeground(Color.BLACK);
+            }
+        } catch (final IOException ignored) {}
+        fileListModel.removeAllElements();
+        final File[] files = dir.listFiles((final File file) -> {
+            if (file.isDirectory()) {
+                return false;
+            } else {
+                if (preferencesWindow.isShowHiddenFiles()) {
+                    return preferencesWindow.isShowBackupFiles() || !file.getName().endsWith("~");
+                } else {
+                    if (preferencesWindow.isShowBackupFiles()) {
+                        return !file.getName().startsWith(".");
                     } else {
-                        if (preferencesWindow.isShowHiddenFiles()) {
-                            return preferencesWindow.isShowBackupFiles() || !file.getName().endsWith("~");
-                        } else {
-                            if (preferencesWindow.isShowBackupFiles()) {
-                                return !file.getName().startsWith(".");
-                            } else {
-                                return !file.getName().startsWith(".") && !file.getName().endsWith("~");
-                            }
-                        }
+                        return !file.getName().startsWith(".") && !file.getName().endsWith("~");
                     }
                 }
-            });
-            // this happens when trying to read a directory without sufficient permissions
-            if (files == null) {
-                return;
             }
-            Arrays.sort(files, preferencesWindow.getFileListSortType() == FileListSortType.ASCENDING_NAME ?
-                sortFilesByName : sortFilesByType);
-            fileListSortType = FileListSortType.ASCENDING_NAME;
-            for (final File file: files) {
-                fileListModel.addElement(file);
-            }
+        });
+        // this happens when trying to read a directory without sufficient permissions
+        if (files == null) {
+            return;
+        }
+        Arrays.sort(files, preferencesWindow.getFileListSortType() == FileListSortType.ASCENDING_NAME ?
+            sortFilesByName : sortFilesByType);
+        fileListSortType = FileListSortType.ASCENDING_NAME;
+        for (final File file: files) {
+            fileListModel.addElement(file);
         }
     };
 
-    private final PreferencesSaveListener preferencesSaveListener = new PreferencesSaveListener() {
-        public void onSave() {
-            directoryTree.setShowHiddenDirectories(preferencesWindow.isShowHiddenDirectories());
-        }
-    };
+    private final PreferencesSaveListener preferencesSaveListener = () -> directoryTree.setShowHiddenDirectories(preferencesWindow.isShowHiddenDirectories());
 
     /**
      * Re-sorts the files by name, descending if they're currently sorted by name ascending
      */
-    private final ActionListener sortByNameClickListener = new ActionListener() {
-        public void actionPerformed(final ActionEvent e) {
-            final Enumeration elementEnumeration = fileListModel.elements();
-            @SuppressWarnings("unchecked") final List<File> elementList = Collections.list(elementEnumeration);
-            if (fileListSortType.isNameType()) {
-                Collections.sort(elementList, fileListSortType.getComplementComparator());
-                fileListSortType = fileListSortType.getComplement();
-            } else {
-                Collections.sort(elementList, sortFilesByName);
-                fileListSortType = FileListSortType.ASCENDING_NAME;
-            }
-            for (int i = 0, elementListSize = elementList.size(); i < elementListSize; i++) {
-                final File file = elementList.get(i);
-                fileListModel.setElementAt(file, i);
-            }
+    private final ActionListener sortByNameClickListener = (final ActionEvent e) -> {
+        final Enumeration elementEnumeration = fileListModel.elements();
+        @SuppressWarnings("unchecked") final List<File> elementList = Collections.list(elementEnumeration);
+        if (fileListSortType.isNameType()) {
+            Collections.sort(elementList, fileListSortType.getComplementComparator());
+            fileListSortType = fileListSortType.getComplement();
+        } else {
+            Collections.sort(elementList, sortFilesByName);
+            fileListSortType = FileListSortType.ASCENDING_NAME;
+        }
+        for (int i = 0, elementListSize = elementList.size(); i < elementListSize; i++) {
+            final File file = elementList.get(i);
+            fileListModel.setElementAt(file, i);
         }
     };
 
     /**
      * Re-sorts the files by type, descending if they're currently sorted by type ascending
      */
-    private final ActionListener sortByTypeClickListener = new ActionListener() {
-        public void actionPerformed(final ActionEvent e) {
-            final Enumeration elementEnumeration = fileListModel.elements();
-            @SuppressWarnings("unchecked") final List<File> elementList = Collections.list(elementEnumeration);
-            if (fileListSortType.isTypeType()) {
-                Collections.sort(elementList, fileListSortType.getComplementComparator());
-                fileListSortType = fileListSortType.getComplement();
-            } else {
-                Collections.sort(elementList, sortFilesByType);
-                fileListSortType = FileListSortType.ASCENDING_TYPE;
-            }
-            for (int i = 0, elementListSize = elementList.size(); i < elementListSize; i++) {
-                final File file = elementList.get(i);
-                fileListModel.setElementAt(file, i);
-            }
+    private final ActionListener sortByTypeClickListener = (final ActionEvent e) -> {
+        final Enumeration elementEnumeration = fileListModel.elements();
+        @SuppressWarnings("unchecked") final List<File> elementList = Collections.list(elementEnumeration);
+        if (fileListSortType.isTypeType()) {
+            Collections.sort(elementList, fileListSortType.getComplementComparator());
+            fileListSortType = fileListSortType.getComplement();
+        } else {
+            Collections.sort(elementList, sortFilesByType);
+            fileListSortType = FileListSortType.ASCENDING_TYPE;
+        }
+        for (int i = 0, elementListSize = elementList.size(); i < elementListSize; i++) {
+            final File file = elementList.get(i);
+            fileListModel.setElementAt(file, i);
         }
     };
 
     /**
      * Updates the state of the convert button
      */
-    private final ListSelectionListener fileListSelectionListener = new ListSelectionListener() {
-        public void valueChanged(final ListSelectionEvent e) {
-            convertButton.setEnabled(fileList.getSelectedIndices().length > 0);
-        }
+    private final ListSelectionListener fileListSelectionListener = (final ListSelectionEvent e) -> convertButton.setEnabled(fileList.getSelectedIndices().length > 0);
+
+    private final ActionListener xbmc11RadioButtonClickListener = (final ActionEvent e) -> {
+        outputType = OutputType.XBMC11;
+        setOutputFilenameExtension(XbmcV11SmartPlaylist.DEFAULT_FILE_EXTENSION);
     };
 
-    private final ActionListener xbmc11RadioButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            outputType = OutputType.XBMC11;
-            setOutputFilenameExtension(XbmcV11SmartPlaylist.DEFAULT_FILE_EXTENSION);
-        }
+    private final ActionListener xbmc12RadioButtonClickListener = (final ActionEvent e) -> {
+        outputType = OutputType.XBMC12;
+        setOutputFilenameExtension(XbmcV12SmartPlaylist.DEFAULT_FILE_EXTENSION);
     };
 
-    private final ActionListener xbmc12RadioButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            outputType = OutputType.XBMC12;
-            setOutputFilenameExtension(XbmcV12SmartPlaylist.DEFAULT_FILE_EXTENSION);
-        }
-    };
-
-    private final ActionListener gmmpRadioButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            outputType = OutputType.GMMP;
-            setOutputFilenameExtension(GmmpSmartPlaylist.DEFAULT_FILE_EXTENSION);
-        }
+    private final ActionListener gmmpRadioButtonClickListener = (final ActionEvent e) -> {
+        outputType = OutputType.GMMP;
+        setOutputFilenameExtension(GmmpSmartPlaylist.DEFAULT_FILE_EXTENSION);
     };
 
     /**
      * Does the file conversion with the selected files and selected options
      */
-    private final ActionListener convertButtonClickListener = new ActionListener() {
-        public void actionPerformed(final ActionEvent e) {
-            final Object[] selectedFiles = fileList.getSelectedValues();
-            for (final Object inputFileObject: selectedFiles) {
-                final File inputFile = (File) inputFileObject;
-                final FormattedSmartPlaylist inputPlaylist;
-                try {
-                    inputPlaylist = converterApi.loadFromFile(inputFile);
-                } catch (final FileNotFoundException fnf) {
-                    messageWindow.addMessage(String.format("%s: %s", inputFile.getName(), fnf.getMessage()));
-                    continue;
-                } catch (final IllegalArgumentException iae) {
-                    messageWindow.addMessage(String.format("%s: %s", inputFile.getName(), iae.getMessage()));
-                    continue;
-                }
+    private final ActionListener convertButtonClickListener = (final ActionEvent e) -> {
+        final List selectedFiles = fileList.getSelectedValuesList();
+        for (final Object inputFileObject: selectedFiles) {
+            final File inputFile = (File) inputFileObject;
+            try {
+                final FormattedSmartPlaylist inputPlaylist = converterApi.loadFromFile(inputFile);
                 final Class<? extends FormattedSmartPlaylist> outputTypeClass = outputTypeMap.get(outputType);
                 if (outputTypeClass == null) {
                     continue;
@@ -282,31 +248,24 @@ public class GuiConverter extends JFrame {
                     }
                     converterApi.clearLog();
                 }
-            }
-            if (preferencesWindow.isAutoPopMessageWindow()) {
-                messageWindow.display(GuiConverter.this);
+            } catch (final FileNotFoundException | IllegalArgumentException fnf) {
+                messageWindow.addMessage(String.format("%s: %s", inputFile.getName(), fnf.getMessage()));
             }
         }
-    };
-
-    private final ActionListener messageWindowButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
+        if (preferencesWindow.isAutoPopMessageWindow()) {
             messageWindow.display(GuiConverter.this);
         }
     };
 
-    private final ActionListener configWindowButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            preferencesWindow.display(GuiConverter.this);
-        }
-    };
+    private final ActionListener messageWindowButtonClickListener = (final ActionEvent e) -> messageWindow.display(GuiConverter.this);
+
+    private final ActionListener configWindowButtonClickListener = (final ActionEvent e) -> preferencesWindow.display(GuiConverter.this);
 
     /**
-     * A customer renderer to only show the file names rather than their fully qualified names
+     * A custom renderer to only show the file names rather than their fully qualified names
      */
-    private final ListCellRenderer fileListCellRenderer = new DefaultListCellRenderer() {
+    @SuppressWarnings("unchecked")
+    private final ListCellRenderer<File> fileListCellRenderer = (ListCellRenderer) new DefaultListCellRenderer() {
         public Component getListCellRendererComponent(final JList list, final Object value, final int index,
                 final boolean isSelected, final boolean cellHasFocus) {
             final Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -346,7 +305,7 @@ public class GuiConverter extends JFrame {
     }
 
     private void createAndShowGui() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         final JPanel directoryChooserPanel = new JPanel(new BorderLayout());
         currentDirectoryField.setText("/");
@@ -436,11 +395,7 @@ public class GuiConverter extends JFrame {
 
     public GuiConverter() {
         super("Smart Playlists");
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGui();
-            }
-        });
+        SwingUtilities.invokeLater(this::createAndShowGui);
     }
 
     private static enum OutputType {

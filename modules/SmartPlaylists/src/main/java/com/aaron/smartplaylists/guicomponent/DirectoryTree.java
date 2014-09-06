@@ -3,13 +3,11 @@ package com.aaron.smartplaylists.guicomponent;
 import com.aaron.smartplaylists.FileComparator;
 import com.aaron.smartplaylists.InvalidPathException;
 import com.aaron.smartplaylists.guicomponent.event.DirectoryTreeSelectionListener;
-import com.google.common.collect.Lists;
 
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -17,8 +15,8 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,7 +52,7 @@ public class DirectoryTree extends JTree {
         defaultRootNode.add(new DefaultMutableTreeNode(defaultSelfDirectory));
     }
 
-    private final List<EventListener> listeners = Lists.newArrayList();
+    private final List<EventListener> listeners = new ArrayList<>();
 
     public DirectoryTree() {
         super(defaultRootNode);
@@ -72,20 +70,14 @@ public class DirectoryTree extends JTree {
         collapseRow(0);
 
         // this is a convenience so that listeners can easily get a reference to the file that was selected
-        addTreeSelectionListener(new TreeSelectionListener() {
-            public void valueChanged(final TreeSelectionEvent event) {
-                final File selectedDirectory = (File) ((DefaultMutableTreeNode) event.getNewLeadSelectionPath().getLastPathComponent()).getUserObject();
-                fireOnSelect(selectedDirectory);
-            }
+        addTreeSelectionListener((final TreeSelectionEvent event) -> {
+            final File selectedDirectory = (File) ((DefaultMutableTreeNode) event.getNewLeadSelectionPath().getLastPathComponent()).getUserObject();
+            fireOnSelect(selectedDirectory);
         });
         addTreeWillExpandListener(new TreeWillExpandListener() {
             public void treeWillExpand(final TreeExpansionEvent event) throws ExpandVetoException {
                 lazyLoadChildren((DefaultMutableTreeNode) event.getPath().getLastPathComponent());
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        updateUI();
-                    }
-                });
+                SwingUtilities.invokeLater(DirectoryTree.this::updateUI);
             }
             public void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {}
         });
@@ -116,22 +108,20 @@ public class DirectoryTree extends JTree {
             return;
         }
         final File directoryToExpand = (File) node.getUserObject();
-        final File[] childFiles = directoryToExpand.listFiles(new FileFilter() {
-            public boolean accept(final File file) {
-                if (filterMode == DIRECTORIES_ONLY) {
-                    return file.isDirectory() && (showHiddenDirectories || !file.getName().startsWith("."));
-                } else { // FILES_AND_DIRECTORIES
-                    if (file.isDirectory()) {
-                        return showHiddenDirectories || !file.getName().startsWith(".");
+        final File[] childFiles = directoryToExpand.listFiles((final File file) -> {
+            if (filterMode == DIRECTORIES_ONLY) {
+                return file.isDirectory() && (showHiddenDirectories || !file.getName().startsWith("."));
+            } else { // FILES_AND_DIRECTORIES
+                if (file.isDirectory()) {
+                    return showHiddenDirectories || !file.getName().startsWith(".");
+                } else {
+                    if (showHiddenFiles) {
+                        return showBackupFiles || !file.getName().endsWith("~");
                     } else {
-                        if (showHiddenFiles) {
-                            return showBackupFiles || !file.getName().endsWith("~");
+                        if (showBackupFiles) {
+                            return !file.getName().startsWith(".");
                         } else {
-                            if (showBackupFiles) {
-                                return !file.getName().startsWith(".");
-                            } else {
-                                return !file.getName().startsWith(".") && !file.getName().endsWith("~");
-                            }
+                            return !file.getName().startsWith(".") && !file.getName().endsWith("~");
                         }
                     }
                 }
@@ -170,7 +160,7 @@ public class DirectoryTree extends JTree {
             throw new InvalidPathException("Path must start with /");
         }
         DefaultMutableTreeNode current = (DefaultMutableTreeNode) treeModel.getRoot();
-        final List<Object> nodes = Lists.newArrayList();
+        final List<Object> nodes = new ArrayList<>();
         nodes.add(current);
         for (int i = 1; i < parts.length; i++) {
             lazyLoadChildren(current);
@@ -238,10 +228,9 @@ public class DirectoryTree extends JTree {
     }
 
     private void fireOnSelect(final File selectedDirectory) {
-        for (final EventListener listener: listeners) {
-            if (listener instanceof DirectoryTreeSelectionListener) {
-                ((DirectoryTreeSelectionListener) listener).onSelect(selectedDirectory);
-            }
-        }
+        listeners.stream()
+            .filter((final EventListener listener) -> listener instanceof DirectoryTreeSelectionListener)
+                .forEach((final EventListener listener) ->
+                    ((DirectoryTreeSelectionListener) listener).onSelect(selectedDirectory));
     }
 }

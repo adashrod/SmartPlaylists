@@ -1,7 +1,6 @@
 package com.aaron.smartplaylists.playlists;
 
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.google.common.collect.Lists;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -13,6 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     private Integer limit;
 
     public XbmcV12SmartPlaylist() {
-        rules = Lists.newArrayList();
+        rules = new ArrayList<>();
     }
 
     @Override

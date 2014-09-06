@@ -1,8 +1,8 @@
 package com.aaron.smartplaylists.playlists;
 
 import com.aaron.smartplaylists.api.SmartPlaylist;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +18,7 @@ public class AgnosticSmartPlaylist implements SmartPlaylist {
     private final List<Rule> rules;
 
     public AgnosticSmartPlaylist() {
-        rules = Lists.newArrayList();
+        rules = new ArrayList<>();
     }
 
     public PlaylistType getPlaylistType() {

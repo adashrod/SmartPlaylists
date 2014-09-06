@@ -5,12 +5,12 @@ import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
 import com.aaron.smartplaylists.playlists.GmmpSmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV11SmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV12SmartPlaylist;
-import com.google.common.collect.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.cli.BasicParser;
@@ -30,7 +30,7 @@ public class CommandLineConverter {
     private static final Logger logger = Logger.getLogger(CommandLineConverter.class);
 
     private static final ConverterApi converterApi = new ConverterApi();
-    private static final Map<String, Class<? extends FormattedSmartPlaylist>> stringConverterMap = Maps.newHashMap();
+    private static final Map<String, Class<? extends FormattedSmartPlaylist>> stringConverterMap = new HashMap<>();
     private static final Options programOptions = new Options()
         .addOption("h", "help", false, "Display this help information");
     static {

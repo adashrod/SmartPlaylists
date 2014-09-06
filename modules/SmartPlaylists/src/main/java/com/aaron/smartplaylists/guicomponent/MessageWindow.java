@@ -21,12 +21,9 @@ public class MessageWindow extends JDialog {
     private final JTextArea messageArea = new JTextArea();
     private final JButton clearButton = new JButton();
 
-    private final ActionListener clearButtonClickListener = new ActionListener() {
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            messageArea.setText("");
-            clearButton.setEnabled(false);
-        }
+    private final ActionListener clearButtonClickListener = (final ActionEvent e) -> {
+        messageArea.setText("");
+        clearButton.setEnabled(false);
     };
 
     public void addMessage(final String message) {
@@ -62,10 +59,6 @@ public class MessageWindow extends JDialog {
 
     public MessageWindow(final JFrame parent) {
         super(parent);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createGui();
-            }
-        });
+        SwingUtilities.invokeLater(this::createGui);
     }
 }
