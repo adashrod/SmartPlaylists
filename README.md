@@ -27,7 +27,7 @@ It's dependent on the following jars and there is currently no dependency manage
 
 Prerequisites
 -------------
-* Java SDK
+* Java SDK 8
 * ant, the Java-based make tool
 * all of the jar files listed in the previous section
 
