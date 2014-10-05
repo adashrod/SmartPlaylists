@@ -57,7 +57,7 @@ public class CommandLineConverter {
 
     private static boolean hasHelpOption(final String[] arguments) {
         for (final String arg: arguments) {
-            if (arg.equals("-h")) {
+            if (arg.equals("-h") || arg.equals("--help")) {
                 return true;
             }
         }
