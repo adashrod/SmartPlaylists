@@ -5,10 +5,12 @@ import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
 import com.aaron.smartplaylists.playlists.MetadataField;
 import com.aaron.smartplaylists.playlists.Operator;
 import com.aaron.smartplaylists.playlists.Order;
-import com.aaron.smartplaylists.util.Pair;
 import com.aaron.smartplaylists.playlists.Rule;
-import com.aaron.smartplaylists.util.Time;
 import com.aaron.smartplaylists.playlists.XbmcSmartPlaylist;
+import com.aaron.timeperiod.Pair;
+import com.aaron.timeperiod.TimePeriod;
+import com.aaron.timeperiod.TimePeriodFormat;
+import com.aaron.timeperiod.TimeUnit;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.log4j.Logger;
@@ -19,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,10 +37,11 @@ public class XbmcPlaylistConverterTools {
     private static final BiMap<String, MetadataField> STRING_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> NUMBER_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> DATE_FIELD_MAP = HashBiMap.create();
+    private static final Set<BiMap<String, MetadataField>> FIELD_MAPS = new HashSet<>();
     private static final BiMap<String, Operator> STRING_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> NUMBER_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> DATE_OPERATOR_MAP = HashBiMap.create();
-    private static final Map<Time.TimeUnit, String> TIME_UNIT_MAP = new HashMap<>();
+    private static final Map<TimeUnit, String> TIME_UNIT_MAP = new HashMap<>();
     private static final Set<String> STRING_FIELD_KEYS;
     private static final Set<String> NUMBER_FIELD_KEYS;
     private static final Set<String> DATE_FIELD_KEYS;
@@ -46,6 +50,8 @@ public class XbmcPlaylistConverterTools {
     private static final Set<MetadataField> DATE_FIELD_VALUES;
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
+    private static final TimePeriodFormat TIME_FORMAT_HMS = new TimePeriodFormat("hh:mm:ss").setMaxUnit(TimeUnit.HOUR);
+    private static final TimePeriodFormat TIME_FORMAT_MS = new TimePeriodFormat("mm:ss");
 
     static {
         PLAYLIST_TYPE_MAP.put("songs", PlaylistType.MUSIC);
@@ -67,6 +73,9 @@ public class XbmcPlaylistConverterTools {
         NUMBER_FIELD_MAP.put("playcount", MetadataField.PLAY_COUNT);
         NUMBER_FIELD_MAP.put("rating", MetadataField.RATING);
         DATE_FIELD_MAP.put("lastplayed", MetadataField.LAST_PLAYED);
+        FIELD_MAPS.add(STRING_FIELD_MAP);
+        FIELD_MAPS.add(NUMBER_FIELD_MAP);
+        FIELD_MAPS.add(DATE_FIELD_MAP);
         STRING_OPERATOR_MAP.put("is", Operator.IS);
         STRING_OPERATOR_MAP.put("isnot", Operator.IS_NOT);
         STRING_OPERATOR_MAP.put("startswith", Operator.STARTS_WITH);
@@ -82,11 +91,11 @@ public class XbmcPlaylistConverterTools {
         DATE_OPERATOR_MAP.put("inthelast", Operator.IN_THE_LAST);
         DATE_OPERATOR_MAP.put("notinthelast", Operator.NOT_IN_THE_LAST);
 
-        TIME_UNIT_MAP.put(Time.TimeUnit.SECONDS, "seconds");
-        TIME_UNIT_MAP.put(Time.TimeUnit.MINUTES, "minutes");
-        TIME_UNIT_MAP.put(Time.TimeUnit.HOURS, "hours");
-        TIME_UNIT_MAP.put(Time.TimeUnit.DAYS, "days");
-        TIME_UNIT_MAP.put(Time.TimeUnit.WEEKS, "weeks");
+        TIME_UNIT_MAP.put(TimeUnit.SECOND, "seconds");
+        TIME_UNIT_MAP.put(TimeUnit.MINUTE, "minutes");
+        TIME_UNIT_MAP.put(TimeUnit.HOUR, "hours");
+        TIME_UNIT_MAP.put(TimeUnit.DAY, "days");
+        TIME_UNIT_MAP.put(TimeUnit.WEEK, "weeks");
 
         STRING_FIELD_KEYS = STRING_FIELD_MAP.keySet();
         NUMBER_FIELD_KEYS = NUMBER_FIELD_MAP.keySet();
@@ -112,6 +121,22 @@ public class XbmcPlaylistConverterTools {
         return isAscending ? "ascending" : "descending";
     }
 
+    private static TimePeriod parseXbmcTimePeriod(final String timePeriodString) throws ParseException {
+        try {
+            return TIME_FORMAT_MS.parse(timePeriodString);
+        } catch (final ParseException pe) {
+            return TIME_FORMAT_HMS.parse(timePeriodString);
+        }
+    }
+
+    private static String formatXbmcTimePeriod(final TimePeriod timePeriod) {
+        if (timePeriod.getHours() > 0) {
+            return TIME_FORMAT_HMS.format(timePeriod);
+        } else {
+            return TIME_FORMAT_MS.format(timePeriod);
+        }
+    }
+
     private static Rule convertRule(final XbmcSmartPlaylist.Rule xbmcRule) throws ParseException {
         final Rule smartRule = new Rule();
         final MetadataField smartField;
@@ -124,7 +149,7 @@ public class XbmcPlaylistConverterTools {
             smartField = NUMBER_FIELD_MAP.get(xbmcRule.getField());
             smartOperator = NUMBER_OPERATOR_MAP.get(xbmcRule.getOperator());
             if (smartField == MetadataField.DURATION) {
-                smartRule.setOperand(Time.parse(xbmcRule.getOperand()));
+                smartRule.setOperand(parseXbmcTimePeriod(xbmcRule.getOperand()));
             } else {
                 smartRule.setOperand(xbmcRule.getOperand());
             }
@@ -133,7 +158,7 @@ public class XbmcPlaylistConverterTools {
             smartOperator = DATE_OPERATOR_MAP.get(xbmcRule.getOperator());
             if (smartOperator == Operator.IN_THE_LAST || smartOperator == Operator.NOT_IN_THE_LAST) {
                 // 2 weeks, 10 days, etc
-                smartRule.setOperand(Time.parse(xbmcRule.getOperand()));
+                smartRule.setOperand(TimePeriod.parseAsWords(xbmcRule.getOperand()));
             } else if (smartOperator == Operator.BEFORE || smartOperator == Operator.AFTER) {
                 // parse date as yyyy-MM-dd
                 smartRule.setOperand(DATE_FORMAT.parse(xbmcRule.getOperand()));
@@ -164,8 +189,8 @@ public class XbmcPlaylistConverterTools {
                 result.getRules().add(convertRule(xbmcRule));
             } catch (final ParseException pe) {
                 log(errorLog, String.format("%s at index %d%s\nRule = %s", pe.getMessage(), pe.getErrorOffset(),
-                    pe.getMessage().contains("date") ? "; Dates must be in the format " + DATE_FORMAT_STRING : ""
-                    ,xbmcRule));
+                    pe.getMessage().contains("date") ? "; Dates must be in the format " + DATE_FORMAT_STRING : "", xbmcRule));
+
             } catch (final IllegalArgumentException iae) {
                 log(errorLog, iae.getMessage());
             }
@@ -191,7 +216,13 @@ public class XbmcPlaylistConverterTools {
         }
         final Order order = new Order();
         order.setAscending(getOrderFromXbmc(direction));
-        final MetadataField orderType = STRING_FIELD_MAP.get(sortKey);
+        MetadataField orderType = null;
+        for (final Map<String, MetadataField> fieldMap: FIELD_MAPS) {
+            if (fieldMap.get(sortKey) != null) {
+                orderType = fieldMap.get(sortKey);
+                break;
+            }
+        }
         if (orderType != MetadataField.PLAYLIST) {
             order.setKey(orderType);
         } else {
@@ -227,7 +258,8 @@ public class XbmcPlaylistConverterTools {
         } else if (DATE_FIELD_VALUES.contains(smartField)) {
             xbmcRule.setField(DATE_FIELD_MAP.inverse().get(smartField));
         } else {
-            throw new IllegalArgumentException(String.format("XBMC playlists do not support the \"%s\" field", smartField));
+            throw new IllegalArgumentException(String.format("XBMC playlists do not support the \"%s\" field\nRule = %s",
+                smartField, smartRule));
         }
         if (xbmcRule.getOperator() == null) {
             throw new IllegalArgumentException(String.format("Operator \"%s\" is not allowed on field \"%s\" in XBMC playlists",
@@ -237,14 +269,14 @@ public class XbmcPlaylistConverterTools {
 
         if (smartOperand instanceof String) {
             xbmcRule.setOperand(smartOperand.toString());
-        } else if (smartOperand instanceof Time) {
-            final Time time = (Time) smartOperand;
+        } else if (smartOperand instanceof TimePeriod) {
+            final TimePeriod time = (TimePeriod) smartOperand;
 
             if (smartField == MetadataField.LAST_PLAYED) {
-                final Pair<Integer, Time.TimeUnit> period = time.getLargestUnit(Time.TimeUnit.WEEKS);
+                final Pair<Long, TimeUnit> period = time.getLargestUnit(TimeUnit.WEEK);
                 xbmcRule.setOperand(period.getFirst() + " " + TIME_UNIT_MAP.get(period.getSecond()));
             } else if (smartField == MetadataField.DURATION) {
-                xbmcRule.setOperand(time.toString());
+                xbmcRule.setOperand(formatXbmcTimePeriod(time));
             } else {
                 throw new IllegalArgumentException("Combination of field and operand types not allowed: " + smartRule);
             }

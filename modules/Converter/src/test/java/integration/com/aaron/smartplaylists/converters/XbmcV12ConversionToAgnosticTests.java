@@ -18,13 +18,13 @@ public class XbmcV12ConversionToAgnosticTests {
 
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
 
-    private final Collection<String> errorLog = new ArrayList<String>();
+    private final Collection<String> errorLog = new ArrayList<>();
 
     private void testAFile(final String filename, final int expectedErrorCount) throws Exception {
         final File file = new File(TEST_PLAYLIST_DIRECTORY + filename);
         final FormattedSmartPlaylist playlist = xbmcV12PlaylistConverter.readFromFile(file);
         xbmcV12PlaylistConverter.convert(playlist, errorLog);
-        assertEquals(errorLog.size(), expectedErrorCount);
+        assertEquals(expectedErrorCount, errorLog.size());
     }
 
     @Before
@@ -33,8 +33,8 @@ public class XbmcV12ConversionToAgnosticTests {
     }
 
     @Test
-    public void oneInvalidTime() throws Exception {
-        testAFile("xbmc12/1_invalid_time.xsp", 1);
+    public void validButUnusualTime() throws Exception {
+        testAFile("xbmc12/valid_unusual_time.xsp", 0);
     }
 
     @Test

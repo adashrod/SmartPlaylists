@@ -3,6 +3,7 @@
     <name>A TEST</name>
     <match>one</match>
     <rule field="time" operator="lessthan">
+        <!-- since hours are the largest unit for this time format, values larger than 24 are allowed and valid -->
         <value>302:39:00</value>
     </rule>
     <order direction="ascending">tracknumber</order>

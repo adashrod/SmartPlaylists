@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="SmartPlaylists" default="run" basedir=".">
-    <property name="lib" value="${basedir}/lib"/>
+    <property name="lib"                           value="${basedir}/lib"/>
     <property name="modules"                       value="${basedir}/modules"/>
     <property name="modules.converter"             value="${modules}/Converter"/>
     <property name="modules.smartplaylists"        value="${modules}/SmartPlaylists"/>
@@ -27,6 +27,9 @@
     <property name="converter.build.test"             value="${build.test}/converter"/>
     <property name="converter.build.test.unit"        value="${converter.build.test}/unit"/>
     <property name="converter.build.test.integration" value="${converter.build.test}/integration"/>
+    <property name="report.dir"                       value="${build}/report"/>
+    <property name="report.dir.unit"                  value="${report.dir}/unit"/>
+    <property name="report.dir.integration"           value="${report.dir}/integration"/>
 
     <!-- where to put the final jars and what to name them -->
     <property name="app"                value="${basedir}/antout"/>
@@ -39,6 +42,7 @@
             <classpath>
                 <pathelement location="${lib}/guava-10.0.1.jar"/>
                 <pathelement location="${lib}/log4j-1.2.15.jar"/>
+                <pathelement location="${lib}/timeperiod-0.1.jar"/>
             </classpath>
             <src path="${converter.main.java}"/>
         </javac>
@@ -113,6 +117,7 @@
             <classpath>
                 <pathelement location="${app}/${jar.converter}"/>
                 <pathelement location="${lib}/junit-4.8.jar"/>
+                <pathelement location="${lib}/timeperiod-0.1.jar"/>
             </classpath>
             <src path="${converter.test.java.integration}"/>
         </javac>
@@ -123,37 +128,53 @@
     </target>
 
     <target name="test.unit.run" depends="compile.converter.test.unit" description="Runs all of the unit tests">
+        <mkdir dir="${report.dir.unit}"/>
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
             <classpath>
                 <pathelement location="${lib}/junit-4.8.jar"/>
                 <pathelement location="${lib}/guava-10.0.1.jar"/>
+                <pathelement location="${lib}/timeperiod-0.1.jar"/>
                 <pathelement location="${app}/${jar.converter}"/>
                 <pathelement location="${converter.build.test.unit}"/>
             </classpath>
 
-            <batchtest>
+            <formatter type="xml"/>
+
+            <batchtest todir="${report.dir.unit}">
                 <fileset dir="${converter.build.test.unit}" includes="**/*.class"/>
             </batchtest>
         </junit>
+        <junitreport todir="${report.dir.unit}">
+            <fileset dir="${report.dir.unit}" includes="TEST-*.xml"/>
+            <report todir="${report.dir.unit}"/>
+        </junitreport>
         <fail if="testfailed" message="Some test(s) failed."/>
     </target>
 
     <target name="test.integration.run" depends="compile.converter.test.integration" description="Runs all of the integration tests">
+        <mkdir dir="${report.dir.integration}"/>
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
             <classpath>
                 <pathelement location="${lib}/junit-4.8.jar"/>
                 <pathelement location="${lib}/guava-10.0.1.jar"/>
                 <pathelement location="${lib}/log4j-1.2.15.jar"/>
+                <pathelement location="${lib}/timeperiod-0.1.jar"/>
                 <pathelement location="${app}/${jar.converter}"/>
                 <pathelement location="${converter.build.test.integration}"/>
             </classpath>
 
-            <batchtest>
+            <formatter type="xml"/>
+
+            <batchtest todir="${report.dir.integration}">
                 <fileset dir="${converter.build.test.integration}" includes="**/*.class"/>
             </batchtest>
         </junit>
+        <junitreport todir="${report.dir.integration}">
+            <fileset dir="${report.dir.integration}" includes="TEST-*.xml"/>
+            <report todir="${report.dir.integration}"/>
+        </junitreport>
         <fail if="testfailed" message="Some test(s) failed."/>
     </target>
 
