@@ -83,7 +83,7 @@ public class DirectoryTree extends JTree {
         });
         setCellRenderer(new DefaultTreeCellRenderer() {
             public Component getTreeCellRendererComponent(final JTree tree, final Object value, final boolean selected,
-                final boolean expanded, final boolean leaf, final int row, final boolean hasFocus) {
+                    final boolean expanded, final boolean leaf, final int row, final boolean hasFocus) {
                 final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                 final Component component = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf,
                     row, hasFocus);

@@ -16,8 +16,10 @@ import java.awt.event.ActionListener;
 
 /**
  * A popup dialog for displaying messages and errors
+ * todo: needs a close button
  */
 public class MessageWindow extends JDialog {
+    // todo: make this scrollable
     private final JTextArea messageArea = new JTextArea();
     private final JButton clearButton = new JButton();
 

@@ -248,8 +248,8 @@ public class GuiConverter extends JFrame {
                     }
                     converterApi.clearLog();
                 }
-            } catch (final FileNotFoundException | IllegalArgumentException fnf) {
-                messageWindow.addMessage(String.format("%s: %s", inputFile.getName(), fnf.getMessage()));
+            } catch (final FileNotFoundException | IllegalArgumentException ex) {
+                messageWindow.addMessage(String.format("%s: %s", inputFile.getName(), ex.getMessage()));
             }
         }
         if (preferencesWindow.isAutoPopMessageWindow()) {

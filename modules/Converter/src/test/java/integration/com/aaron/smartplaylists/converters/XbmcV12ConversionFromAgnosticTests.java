@@ -18,7 +18,7 @@ import static junit.framework.Assert.assertEquals;
 public class XbmcV12ConversionFromAgnosticTests {
     private final XbmcV12PlaylistConverter xbmcV12PlaylistConverter = new XbmcV12PlaylistConverter();
 
-    private final Collection<String> errorLog = new ArrayList<String>();
+    private final Collection<String> errorLog = new ArrayList<>();
 
     @Before
     public void before() {

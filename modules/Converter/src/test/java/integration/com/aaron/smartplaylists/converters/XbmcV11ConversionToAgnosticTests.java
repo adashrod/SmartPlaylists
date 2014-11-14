@@ -18,7 +18,7 @@ public class XbmcV11ConversionToAgnosticTests {
 
     private final XbmcV11PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
 
-    private final Collection<String> errorLog = new ArrayList<String>();
+    private final Collection<String> errorLog = new ArrayList<>();
 
     private void testAFile(final String filename, final int expectedErrorCount) throws Exception {
         final File file = new File(TEST_PLAYLIST_DIRECTORY + filename);
