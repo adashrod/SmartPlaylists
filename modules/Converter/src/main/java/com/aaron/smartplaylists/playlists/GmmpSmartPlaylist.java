@@ -40,8 +40,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return version;
     }
 
-    public void setVersion(final Integer version) {
+    public GmmpSmartPlaylist setVersion(final Integer version) {
         this.version = version;
+        return this;
     }
 
     @XmlElement(name = "Name")
@@ -49,8 +50,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return name;
     }
 
-    public void setName(final String name) {
+    public GmmpSmartPlaylist setName(final String name) {
         this.name = name;
+        return this;
     }
 
     @XmlElement(name = "Order")
@@ -58,8 +60,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return order;
     }
 
-    public void setOrder(final Integer order) {
+    public GmmpSmartPlaylist setOrder(final Integer order) {
         this.order = order;
+        return this;
     }
 
     @XmlElement(name = "Ascending")
@@ -67,8 +70,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return ascending;
     }
 
-    public void setAscending(final Boolean ascending) {
+    public GmmpSmartPlaylist setAscending(final Boolean ascending) {
         this.ascending = ascending;
+        return this;
     }
 
     @XmlElement(name = "Limit")
@@ -76,8 +80,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return limit;
     }
 
-    public void setLimit(final Integer limit) {
+    public GmmpSmartPlaylist setLimit(final Integer limit) {
         this.limit = limit;
+        return this;
     }
 
     @XmlElement(name = "MatchAll")
@@ -85,8 +90,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
         return matchAll;
     }
 
-    public void setMatchAll(final Boolean matchAll) {
+    public GmmpSmartPlaylist setMatchAll(final Boolean matchAll) {
         this.matchAll = matchAll;
+        return this;
     }
 
     @XmlElementWrapper(name = "Rules")
@@ -130,8 +136,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
             return version;
         }
 
-        public void setVersion(final int version) {
+        public Rule setVersion(final int version) {
             this.version = version;
+            return this;
         }
 
         @XmlElement(name = "Field")
@@ -139,8 +146,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
             return field;
         }
 
-        public void setField(final int field) {
+        public Rule setField(final int field) {
             this.field = field;
+            return this;
         }
 
         @XmlElement(name = "Operator")
@@ -148,8 +156,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
             return operator;
         }
 
-        public void setOperator(final int operator) {
+        public Rule setOperator(final int operator) {
             this.operator = operator;
+            return this;
         }
 
         @XmlElement(name = "Value")
@@ -157,8 +166,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
             return value;
         }
 
-        public void setValue(final String value) {
+        public Rule setValue(final String value) {
             this.value = value;
+            return this;
         }
 
         @XmlElement(name = "TimeUnit")
@@ -166,8 +176,9 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
             return timeUnit;
         }
 
-        public void setTimeUnit(final int timeUnit) {
+        public Rule setTimeUnit(final int timeUnit) {
             this.timeUnit = timeUnit;
+            return this;
         }
 
         @Override

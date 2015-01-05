@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * todo: replace getMatchAll* and getOrder* with BiMaps
  * The meat of XBMC playlist conversion. Since v11 and v12 XBMC playlists have an identical java API, the only
  * difference needed to handle the two separately is casting them when passing to functions in this class.
  */
@@ -297,13 +298,13 @@ public class XbmcPlaylistConverterTools {
      * @param xbmcSmartPlaylist the playlist to to set defaults on
      */
     private static void setDefaultsOn(final XbmcSmartPlaylist xbmcSmartPlaylist) {
-        final XbmcSmartPlaylist.Order order = xbmcSmartPlaylist.newOrder();
-        order.setDirection(getOrderForXbmc(defaultOrderIsAscending));
-        // default in XBMC UI is order by "none", whose sort algorithm I can't find a pattern in, so just pick a sane default
-        order.setSortKey(STRING_FIELD_MAP.inverse().get(defaultOrderByField));
-        xbmcSmartPlaylist.setOrder(order);
-        xbmcSmartPlaylist.setMatch(getMatchAllForXbmc(defaultMatchAll));
-        xbmcSmartPlaylist.setLimit(defaultLimit);
+        final XbmcSmartPlaylist.Order order = xbmcSmartPlaylist.newOrder()
+            .setDirection(getOrderForXbmc(defaultOrderIsAscending))
+            // default in XBMC UI is order by "none", whose sort algorithm I can't find a pattern in, so just pick a sane default
+            .setSortKey(STRING_FIELD_MAP.inverse().get(defaultOrderByField));
+        xbmcSmartPlaylist.setOrder(order)
+            .setMatch(getMatchAllForXbmc(defaultMatchAll))
+            .setLimit(defaultLimit);
     }
 
     /**
@@ -343,12 +344,12 @@ public class XbmcPlaylistConverterTools {
      * @param smartPlaylist the playlist to to set defaults on
      */
     private static void setDefaultsOn(final AgnosticSmartPlaylist smartPlaylist) {
-        final Order order = new Order();
-        order.setAscending(defaultOrderIsAscending);
-        order.setKey(defaultOrderByField);
-        smartPlaylist.setOrder(order);
-        smartPlaylist.setMatchAll(defaultMatchAll);
-        smartPlaylist.setLimit(defaultLimit);
+        final Order order = new Order()
+            .setAscending(defaultOrderIsAscending)
+            .setKey(defaultOrderByField);
+        smartPlaylist.setOrder(order)
+            .setMatchAll(defaultMatchAll)
+            .setLimit(defaultLimit);
     }
 
     /**

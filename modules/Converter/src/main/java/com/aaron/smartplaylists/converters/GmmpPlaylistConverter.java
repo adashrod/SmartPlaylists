@@ -265,11 +265,11 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
      * @param gmmpSmartPlaylist the playlist to to set defaults on
      */
     private void setDefaultsOn(final GmmpSmartPlaylist gmmpSmartPlaylist) {
-        gmmpSmartPlaylist.setVersion(1);
-        gmmpSmartPlaylist.setOrder(ORDER_BY_MAP.inverse().get(defaultOrderByField));
-        gmmpSmartPlaylist.setAscending(defaultOrderIsAscending);
-        gmmpSmartPlaylist.setMatchAll(defaultMatchAll);
-        gmmpSmartPlaylist.setLimit(defaultLimit);
+        gmmpSmartPlaylist.setVersion(1)
+            .setOrder(ORDER_BY_MAP.inverse().get(defaultOrderByField))
+            .setAscending(defaultOrderIsAscending)
+            .setMatchAll(defaultMatchAll)
+            .setLimit(defaultLimit);
     }
 
     /**
@@ -303,12 +303,12 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
      * @param smartPlaylist the playlist to to set defaults on
      */
     private void setDefaultsOn(final AgnosticSmartPlaylist smartPlaylist) {
-        final Order order = new Order();
-        order.setKey(defaultOrderByField);
-        order.setAscending(defaultOrderIsAscending);
-        smartPlaylist.setOrder(order);
-        smartPlaylist.setMatchAll(defaultMatchAll);
-        smartPlaylist.setLimit(defaultLimit);
+        final Order order = new Order()
+            .setKey(defaultOrderByField)
+            .setAscending(defaultOrderIsAscending);
+        smartPlaylist.setOrder(order)
+            .setMatchAll(defaultMatchAll)
+            .setLimit(defaultLimit);
     }
 
     /**

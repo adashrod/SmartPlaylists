@@ -11,15 +11,17 @@ public class Order {
         return ascending;
     }
 
-    public void setAscending(final boolean ascending) {
+    public Order setAscending(final boolean ascending) {
         this.ascending = ascending;
+        return this;
     }
 
     public MetadataField getKey() {
         return key;
     }
 
-    public void setKey(final MetadataField key) {
+    public Order setKey(final MetadataField key) {
         this.key = key;
+        return this;
     }
 }

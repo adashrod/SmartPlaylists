@@ -15,47 +15,47 @@ public interface XbmcSmartPlaylist {
 
     public String getType();
 
-    public void setType(String type);
+    public XbmcSmartPlaylist setType(String type);
 
     public String getName();
 
-    public void setName(String name);
+    public XbmcSmartPlaylist setName(String name);
 
     public String getMatch();
 
-    public void setMatch(String match);
+    public XbmcSmartPlaylist setMatch(String match);
 
     public List<Rule> getRules();
 
     public Order getOrder();
 
-    public void setOrder(Order order);
+    public XbmcSmartPlaylist setOrder(Order order);
 
     public Integer getLimit();
 
-    public void setLimit(Integer limit);
+    public XbmcSmartPlaylist setLimit(Integer limit);
 
     public static interface Order {
         public String getDirection();
 
-        public void setDirection(String direction);
+        public Order setDirection(String direction);
 
         public String getSortKey();
 
-        public void setSortKey(String sortKey);
+        public Order setSortKey(String sortKey);
     }
 
     public static interface Rule {
         public String getField();
 
-        public void setField(String field);
+        public Rule setField(String field);
 
         public String getOperator();
 
-        public void setOperator(String operator);
+        public Rule setOperator(String operator);
 
         public String getOperand();
 
-        public void setOperand(String operand);
+        public Rule setOperand(String operand);
     }
 }

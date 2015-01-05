@@ -16,24 +16,27 @@ public class Rule {
         return field;
     }
 
-    public void setField(final MetadataField field) {
+    public Rule setField(final MetadataField field) {
         this.field = field;
+        return this;
     }
 
     public Operator getOperator() {
         return operator;
     }
 
-    public void setOperator(final Operator operator) {
+    public Rule setOperator(final Operator operator) {
         this.operator = operator;
+        return this;
     }
 
     public Object getOperand() {
         return operand;
     }
 
-    public void setOperand(final Object operand) {
+    public Rule setOperand(final Object operand) {
         this.operand = operand;
+        return this;
     }
 
     @Override

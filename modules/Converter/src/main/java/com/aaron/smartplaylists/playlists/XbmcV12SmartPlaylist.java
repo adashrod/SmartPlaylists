@@ -51,8 +51,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     }
 
     @Override
-    public void setType(final String type) {
+    public XbmcSmartPlaylist setType(final String type) {
         this.type = type;
+        return this;
     }
 
     @Override
@@ -61,8 +62,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     }
 
     @Override
-    public void setName(final String name) {
+    public XbmcSmartPlaylist setName(final String name) {
         this.name = name;
+        return this;
     }
 
     @Override
@@ -71,8 +73,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     }
 
     @Override
-    public void setMatch(final String match) {
+    public XbmcSmartPlaylist setMatch(final String match) {
         this.match = match;
+        return this;
     }
 
     @Override
@@ -88,8 +91,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     }
 
     @Override
-    public void setOrder(final XbmcSmartPlaylist.Order order) {
+    public XbmcSmartPlaylist setOrder(final XbmcSmartPlaylist.Order order) {
         this.order = order;
+        return this;
     }
 
     @Override
@@ -98,8 +102,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
     }
 
     @Override
-    public void setLimit(final Integer limit) {
+    public XbmcSmartPlaylist setLimit(final Integer limit) {
         this.limit = limit;
+        return this;
     }
 
     @Override
@@ -135,8 +140,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
         }
 
         @Override
-        public void setDirection(final String direction) {
+        public Order setDirection(final String direction) {
             this.direction = direction;
+            return this;
         }
 
         @Override
@@ -146,8 +152,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
         }
 
         @Override
-        public void setSortKey(final String sortKey) {
+        public Order setSortKey(final String sortKey) {
             this.sortKey = sortKey;
+            return this;
         }
     }
 
@@ -163,8 +170,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
         }
 
         @Override
-        public void setField(final String field) {
+        public Rule setField(final String field) {
             this.field = field;
+            return this;
         }
 
         @Override
@@ -174,8 +182,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
         }
 
         @Override
-        public void setOperator(final String operator) {
+        public Rule setOperator(final String operator) {
             this.operator = operator;
+            return this;
         }
 
         @Override
@@ -185,8 +194,9 @@ public class XbmcV12SmartPlaylist implements FormattedSmartPlaylist, XbmcSmartPl
         }
 
         @Override
-        public void setOperand(final String operand) {
+        public Rule setOperand(final String operand) {
             this.operand = operand;
+            return this;
         }
 
         @Override
