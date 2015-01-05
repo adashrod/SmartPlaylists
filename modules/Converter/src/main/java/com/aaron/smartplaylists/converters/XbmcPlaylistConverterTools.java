@@ -28,7 +28,6 @@ import java.util.Set;
 /**
  * The meat of XBMC playlist conversion. Since v11 and v12 XBMC playlists have an identical java API, the only
  * difference needed to handle the two separately is casting them when passing to functions in this class.
- * todo: make sure that <limit>0</limit> doesn't cause problems
  */
 public class XbmcPlaylistConverterTools {
     private static final Logger logger = Logger.getLogger(XbmcPlaylistConverterTools.class);
@@ -37,7 +36,7 @@ public class XbmcPlaylistConverterTools {
     private static final BiMap<String, MetadataField> STRING_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> NUMBER_FIELD_MAP = HashBiMap.create();
     private static final BiMap<String, MetadataField> DATE_FIELD_MAP = HashBiMap.create();
-    private static final Set<BiMap<String, MetadataField>> FIELD_MAPS = new HashSet<>();
+    private static final Collection<BiMap<String, MetadataField>> FIELD_MAPS = new HashSet<>();
     private static final BiMap<String, Operator> STRING_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> NUMBER_OPERATOR_MAP = HashBiMap.create();
     private static final BiMap<String, Operator> DATE_OPERATOR_MAP = HashBiMap.create();
@@ -52,6 +51,11 @@ public class XbmcPlaylistConverterTools {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final TimePeriodFormat TIME_FORMAT_HMS = new TimePeriodFormat("hh:mm:ss").setMaxUnit(TimeUnit.HOUR);
     private static final TimePeriodFormat TIME_FORMAT_MS = new TimePeriodFormat("mm:ss");
+
+    private static final boolean defaultMatchAll = false;
+    private static final MetadataField defaultOrderByField = MetadataField.TITLE;
+    private static final boolean defaultOrderIsAscending = true;
+    private static final int defaultLimit = 0; // no limit
 
     static {
         PLAYLIST_TYPE_MAP.put("songs", PlaylistType.MUSIC);
@@ -180,9 +184,14 @@ public class XbmcPlaylistConverterTools {
     public static AgnosticSmartPlaylist convert(final XbmcSmartPlaylist xbmcSmartPlaylist,
             final Collection<String> errorLog) {
         final AgnosticSmartPlaylist result = new AgnosticSmartPlaylist();
+        setDefaultsOn(result);
+        overrideDefaults(result, xbmcSmartPlaylist, errorLog);
+        if (result.getOrder().getKey() == MetadataField.PLAYLIST) {
+            log(errorLog, "order by playlist is not allowed in XBMC playlists");
+            result.getOrder().setKey(MetadataField.TITLE);
+        }
         result.setPlaylistType(PLAYLIST_TYPE_MAP.get(xbmcSmartPlaylist.getType()));
         result.setName(xbmcSmartPlaylist.getName());
-        result.setMatchAll(getMatchAllFromXbmc(xbmcSmartPlaylist.getMatch()));
 
         for (final XbmcSmartPlaylist.Rule xbmcRule: xbmcSmartPlaylist.getRules()) {
             try {
@@ -195,43 +204,6 @@ public class XbmcPlaylistConverterTools {
                 log(errorLog, iae.getMessage());
             }
         }
-
-        // todo: change this to have smartplaylist -> specific playlist conversion know what the defaults are for its format
-        final String direction;
-        final String sortKey;
-        if (xbmcSmartPlaylist.getOrder() != null ) {
-            if (xbmcSmartPlaylist.getOrder().getDirection() != null) {
-                direction = xbmcSmartPlaylist.getOrder().getDirection();
-            } else {
-                direction = "";
-            }
-            if (xbmcSmartPlaylist.getOrder().getSortKey() != null) {
-                sortKey = xbmcSmartPlaylist.getOrder().getSortKey();
-            } else {
-                sortKey = STRING_FIELD_MAP.inverse().get(MetadataField.TITLE);
-            }
-        } else {
-            direction = "";
-            sortKey = STRING_FIELD_MAP.inverse().get(MetadataField.TITLE);
-        }
-        final Order order = new Order();
-        order.setAscending(getOrderFromXbmc(direction));
-        MetadataField orderType = null;
-        for (final Map<String, MetadataField> fieldMap: FIELD_MAPS) {
-            if (fieldMap.get(sortKey) != null) {
-                orderType = fieldMap.get(sortKey);
-                break;
-            }
-        }
-        if (orderType != MetadataField.PLAYLIST) {
-            order.setKey(orderType);
-        } else {
-            log(errorLog, "order by playlist is not allowed in XBMC playlists");
-            order.setKey(MetadataField.TITLE);
-        }
-        result.setOrder(order);
-
-        result.setLimit(xbmcSmartPlaylist.getLimit());
 
         return result;
     }
@@ -303,9 +275,10 @@ public class XbmcPlaylistConverterTools {
             log(errorLog, String.format("Unable to instantiate an XBMC playlist; check the constructors: %s", e.getMessage()));
             return null;
         }
+        setDefaultsOn(result);
+        overrideDefaults(result, agnosticSmartPlaylist, errorLog);
         result.setType(PLAYLIST_TYPE_MAP.inverse().get(agnosticSmartPlaylist.getPlaylistType()));
         result.setName(agnosticSmartPlaylist.getName());
-        result.setMatch(getMatchAllForXbmc(agnosticSmartPlaylist.isMatchAll()));
 
         final Class<? extends XbmcSmartPlaylist.Rule> ruleType = result.newRule().getClass();
         for (final Rule smartRule: agnosticSmartPlaylist.getRules()) {
@@ -316,15 +289,100 @@ public class XbmcPlaylistConverterTools {
             }
         }
 
-        final XbmcSmartPlaylist.Order xbmcOrder = result.newOrder();
-        // todo: define defaults for when agnosticSmartPlaylist is missing data
-        xbmcOrder.setDirection(getOrderForXbmc(agnosticSmartPlaylist.getOrder() == null || agnosticSmartPlaylist.getOrder().isAscending()));
-        xbmcOrder.setSortKey(STRING_FIELD_MAP.inverse().get(agnosticSmartPlaylist.getOrder() != null ?
-            agnosticSmartPlaylist.getOrder().getKey() : MetadataField.TITLE));
-        result.setOrder(xbmcOrder);
-
-        result.setLimit(agnosticSmartPlaylist.getLimit());
         return result;
+    }
+
+    /**
+     * Sets the default values on the playlist. These values are what XBMC uses when they are missing from the XML.
+     * @param xbmcSmartPlaylist the playlist to to set defaults on
+     */
+    private static void setDefaultsOn(final XbmcSmartPlaylist xbmcSmartPlaylist) {
+        final XbmcSmartPlaylist.Order order = xbmcSmartPlaylist.newOrder();
+        order.setDirection(getOrderForXbmc(defaultOrderIsAscending));
+        // default in XBMC UI is order by "none", whose sort algorithm I can't find a pattern in, so just pick a sane default
+        order.setSortKey(STRING_FIELD_MAP.inverse().get(defaultOrderByField));
+        xbmcSmartPlaylist.setOrder(order);
+        xbmcSmartPlaylist.setMatch(getMatchAllForXbmc(defaultMatchAll));
+        xbmcSmartPlaylist.setLimit(defaultLimit);
+    }
+
+    /**
+     * Overrides the default values in xbmcSmartPlaylist with the values present in smartPlaylist
+     * @param xbmcSmartPlaylist the playlist that's being edited
+     * @param smartPlaylist     the playlist whose values are being read
+     * @param errorLog          log for errors encountered during operation
+     */
+    private static void overrideDefaults(final XbmcSmartPlaylist xbmcSmartPlaylist, final AgnosticSmartPlaylist smartPlaylist,
+            final Collection<String> errorLog) {
+        if (smartPlaylist.getOrder() != null) {
+            if (smartPlaylist.getOrder().getKey() != null) {
+                boolean set = false;
+                for (final BiMap<String, MetadataField> fieldMap: FIELD_MAPS) {
+                    if (fieldMap.inverse().containsKey(smartPlaylist.getOrder().getKey())) {
+                        xbmcSmartPlaylist.getOrder().setSortKey(fieldMap.inverse().get(smartPlaylist.getOrder().getKey()));
+                        set = true;
+                        break;
+                    }
+                }
+                if (!set) {
+                    log(errorLog, String.format("Order value \"%s\" is not allowed in XBMC playlists", smartPlaylist.getOrder().getKey()));
+                }
+            }
+            xbmcSmartPlaylist.getOrder().setDirection(getOrderForXbmc(smartPlaylist.getOrder().isAscending()));
+        }
+        if (smartPlaylist.isMatchAll() != null) {
+            xbmcSmartPlaylist.setMatch(getMatchAllForXbmc(smartPlaylist.isMatchAll()));
+        }
+        if (smartPlaylist.getLimit() != null) {
+            xbmcSmartPlaylist.setLimit(smartPlaylist.getLimit());
+        }
+    }
+
+    /**
+     * Sets the default values on the playlist. These values are what XBMC uses when they are missing from the XML.
+     * @param smartPlaylist the playlist to to set defaults on
+     */
+    private static void setDefaultsOn(final AgnosticSmartPlaylist smartPlaylist) {
+        final Order order = new Order();
+        order.setAscending(defaultOrderIsAscending);
+        order.setKey(defaultOrderByField);
+        smartPlaylist.setOrder(order);
+        smartPlaylist.setMatchAll(defaultMatchAll);
+        smartPlaylist.setLimit(defaultLimit);
+    }
+
+    /**
+     * Overrides the default values in smartPlaylist with the values present in xbmcSmartPlaylist
+     * @param smartPlaylist     the playlist that's being edited
+     * @param xbmcSmartPlaylist the playlist whose values are being read
+     * @param errorLog          log for errors encountered during operation
+     */
+    private static void overrideDefaults(final AgnosticSmartPlaylist smartPlaylist, final XbmcSmartPlaylist xbmcSmartPlaylist,
+            final Collection<String> errorLog) {
+        if (xbmcSmartPlaylist.getOrder() != null) {
+            if (xbmcSmartPlaylist.getOrder().getSortKey() != null) {
+                boolean set = false;
+                for (final BiMap<String, MetadataField> fieldMap: FIELD_MAPS) {
+                    if (fieldMap.containsKey(xbmcSmartPlaylist.getOrder().getSortKey())) {
+                        smartPlaylist.getOrder().setKey(fieldMap.get(xbmcSmartPlaylist.getOrder().getSortKey()));
+                        set = true;
+                        break;
+                    }
+                }
+                if (!set) {
+                    log(errorLog, String.format("Invalid order value \"%s\" in XBMC playlist", xbmcSmartPlaylist.getOrder().getSortKey()));
+                }
+            }
+            if (xbmcSmartPlaylist.getOrder().getDirection() != null) {
+                smartPlaylist.getOrder().setAscending(getOrderFromXbmc(xbmcSmartPlaylist.getOrder().getDirection()));
+            }
+        }
+        if (xbmcSmartPlaylist.getMatch() != null) {
+            smartPlaylist.setMatchAll(getMatchAllFromXbmc(xbmcSmartPlaylist.getMatch()));
+        }
+        if (xbmcSmartPlaylist.getLimit() != null) {
+            smartPlaylist.setLimit(xbmcSmartPlaylist.getLimit());
+        }
     }
 
     private static void log(final Collection<String> errorLog, final String message) {

@@ -23,12 +23,12 @@ import java.util.List;
 public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
     public static final String DEFAULT_FILE_EXTENSION = "spl";
 
-    private int version;
+    private Integer version;
     private String name;
-    private int order;
-    private boolean ascending;
-    private int limit;
-    private boolean matchAll;
+    private Integer order;
+    private Boolean ascending;
+    private Integer limit;
+    private Boolean matchAll;
     private final List<Rule> rules;
 
     public GmmpSmartPlaylist() {
@@ -36,11 +36,11 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
     }
 
     @XmlElement(name = "Version")
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(final Integer version) {
         this.version = version;
     }
 
@@ -54,38 +54,38 @@ public class GmmpSmartPlaylist implements FormattedSmartPlaylist {
     }
 
     @XmlElement(name = "Order")
-    public int getOrder() {
+    public Integer getOrder() {
         return order;
     }
 
-    public void setOrder(final int order) {
+    public void setOrder(final Integer order) {
         this.order = order;
     }
 
     @XmlElement(name = "Ascending")
-    public boolean isAscending() {
+    public Boolean isAscending() {
         return ascending;
     }
 
-    public void setAscending(final boolean ascending) {
+    public void setAscending(final Boolean ascending) {
         this.ascending = ascending;
     }
 
     @XmlElement(name = "Limit")
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(final int limit) {
+    public void setLimit(final Integer limit) {
         this.limit = limit;
     }
 
     @XmlElement(name = "MatchAll")
-    public boolean isMatchAll() {
+    public Boolean isMatchAll() {
         return matchAll;
     }
 
-    public void setMatchAll(final boolean matchAll) {
+    public void setMatchAll(final Boolean matchAll) {
         this.matchAll = matchAll;
     }
 

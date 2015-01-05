@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventListener;
@@ -52,7 +53,7 @@ public class DirectoryTree extends JTree {
         defaultRootNode.add(new DefaultMutableTreeNode(defaultSelfDirectory));
     }
 
-    private final List<EventListener> listeners = new ArrayList<>();
+    private final Collection<EventListener> listeners = new ArrayList<>();
 
     public DirectoryTree() {
         super(defaultRootNode);
@@ -160,7 +161,7 @@ public class DirectoryTree extends JTree {
             throw new InvalidPathException("Path must start with /");
         }
         DefaultMutableTreeNode current = (DefaultMutableTreeNode) treeModel.getRoot();
-        final List<Object> nodes = new ArrayList<>();
+        final Collection<Object> nodes = new ArrayList<>();
         nodes.add(current);
         for (int i = 1; i < parts.length; i++) {
             lazyLoadChildren(current);
@@ -200,7 +201,7 @@ public class DirectoryTree extends JTree {
      * Events are also fired after a call to setPath, since setPath will ultimately select a file to update the view.
      * @param listener the listener to register
      */
-    public void addTreeSelectionListener(final DirectoryTreeSelectionListener listener) {
+    public void addTreeSelectionListener(final EventListener listener) {
         listeners.add(listener);
     }
 
@@ -208,7 +209,7 @@ public class DirectoryTree extends JTree {
      * Removes a registered listener.
      * @param listener the listener to remove
      */
-    public void removeTreeSelectionListener(final DirectoryTreeSelectionListener listener) {
+    public void removeTreeSelectionListener(final EventListener listener) {
         listeners.remove(listener);
     }
 
@@ -229,8 +230,9 @@ public class DirectoryTree extends JTree {
 
     private void fireOnSelect(final File selectedDirectory) {
         listeners.stream()
-            .filter((final EventListener listener) -> listener instanceof DirectoryTreeSelectionListener)
-                .forEach((final EventListener listener) ->
+            .filter((final EventListener listener) -> {
+                return listener instanceof DirectoryTreeSelectionListener;
+            }).forEach((final EventListener listener) ->
                     ((DirectoryTreeSelectionListener) listener).onSelect(selectedDirectory));
     }
 }

@@ -32,7 +32,7 @@ public class XbmcV11PlaylistConverter implements PlaylistConverter {
     public FormattedSmartPlaylist readFromFile(final File file) throws JAXBException, FileNotFoundException {
         final JAXBContext context = JAXBContext.newInstance(XbmcV11SmartPlaylist.class);
         final Unmarshaller unmarshaller = context.createUnmarshaller();
-        unmarshaller.setEventHandler((final ValidationEvent event) -> !event.getMessage().contains("unexpected element"));
+        unmarshaller.setEventHandler((final ValidationEvent event) -> { return !event.getMessage().contains("unexpected element"); });
         return (XbmcV11SmartPlaylist) unmarshaller.unmarshal(new FileReader(file));
     }
 

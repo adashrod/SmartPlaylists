@@ -58,7 +58,7 @@
         <jar destfile="${app}/${jar.converter}" basedir="${converter.build}" manifest="${converter.main.resources}/META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="compile.smartplaylists" depends="compile.converter"
+    <target name="compile.smartplaylists" depends="jar.converter"
             description="compiles the SmartPlaylists module, which is the main program">
         <mkdir dir="${smartplaylists.build}"/>
         <javac destdir="${smartplaylists.build}" includeantruntime="false">

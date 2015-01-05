@@ -53,6 +53,11 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
     private static final String DATE_FORMAT_STRING = "yyyy/MM/dd";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
+    private static final boolean defaultMatchAll = false;
+    private static final MetadataField defaultOrderByField = MetadataField.RANDOM;
+    private static final boolean defaultOrderIsAscending = false;
+    private static final int defaultLimit = 0; // no limit
+
     static {
         STRING_FIELD_MAP.put(0, MetadataField.ARTIST);
         STRING_FIELD_MAP.put(1, MetadataField.ALBUM_ARTIST);
@@ -138,19 +143,10 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
             final Collection<String> errorLog) {
         final AgnosticSmartPlaylist result = new AgnosticSmartPlaylist();
         final GmmpSmartPlaylist gmmpSmartPlaylist = (GmmpSmartPlaylist) formattedSmartPlaylist;
+        setDefaultsOn(result);
+        overrideDefaults(result, gmmpSmartPlaylist, errorLog);
         result.setPlaylistType(PlaylistType.MUSIC);
         result.setName(gmmpSmartPlaylist.getName());
-        result.setMatchAll(gmmpSmartPlaylist.isMatchAll());
-        result.setLimit(gmmpSmartPlaylist.getLimit());
-
-        final Order order = new Order();
-        order.setAscending(gmmpSmartPlaylist.isAscending());
-        order.setKey(ORDER_BY_MAP.get(gmmpSmartPlaylist.getOrder()));
-        if (order.getKey() != null) {
-            result.setOrder(order);
-        } else {
-            log(errorLog, String.format("Invalid order value \"%d\" in GMMP playlist", gmmpSmartPlaylist.getOrder()));
-        }
 
         for (final GmmpSmartPlaylist.Rule gmmpRule: gmmpSmartPlaylist.getRules()) {
             final Rule smartRule = new Rule();
@@ -221,11 +217,8 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
             final Collection<String> errorLog) {
         final GmmpSmartPlaylist result = new GmmpSmartPlaylist();
         setDefaultsOn(result);
+        overrideDefaults(result, agnosticSmartPlaylist, errorLog);
         result.setName(agnosticSmartPlaylist.getName());
-        result.setMatchAll(agnosticSmartPlaylist.isMatchAll());
-        result.setOrder(ORDER_BY_MAP.inverse().get(agnosticSmartPlaylist.getOrder().getKey()));
-        result.setAscending(agnosticSmartPlaylist.getOrder().isAscending());
-        result.setLimit(agnosticSmartPlaylist.getLimit() != null ? agnosticSmartPlaylist.getLimit() : 0);
         for (final Rule smartRule: agnosticSmartPlaylist.getRules()) {
             final GmmpSmartPlaylist.Rule gmmpRule = new GmmpSmartPlaylist.Rule();
             gmmpRule.setVersion(1);
@@ -257,9 +250,9 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
                 gmmpRule.setValue(DATE_FORMAT.format(operand));
                 gmmpRule.setTimeUnit(TIME_UNIT_MAP.inverse().get(null));
             } else {
-                log(errorLog, String.format("Something went horribly wrong. the operand of a %s should be a %s, %s, or %s, but was a %s",
+                log(errorLog, String.format("Something went horribly wrong. the operand of a %s should be a %s, %s, or %s, but was a %s. Rule = %s",
                     Rule.class.getCanonicalName(), String.class.getName(), TimePeriod.class.getCanonicalName(),
-                    Date.class.getName(), operand.getClass().getCanonicalName()));
+                    Date.class.getName(), operand.getClass().getCanonicalName(), smartRule));
             }
 
             result.getRules().add(gmmpRule);
@@ -273,9 +266,75 @@ public class GmmpPlaylistConverter implements PlaylistConverter {
      */
     private void setDefaultsOn(final GmmpSmartPlaylist gmmpSmartPlaylist) {
         gmmpSmartPlaylist.setVersion(1);
-        gmmpSmartPlaylist.setOrder(ORDER_BY_MAP.inverse().get(MetadataField.RANDOM));
-        gmmpSmartPlaylist.setAscending(false);
-        gmmpSmartPlaylist.setMatchAll(false);
+        gmmpSmartPlaylist.setOrder(ORDER_BY_MAP.inverse().get(defaultOrderByField));
+        gmmpSmartPlaylist.setAscending(defaultOrderIsAscending);
+        gmmpSmartPlaylist.setMatchAll(defaultMatchAll);
+        gmmpSmartPlaylist.setLimit(defaultLimit);
+    }
+
+    /**
+     * Overrides the default values in gmmpSmartPlaylist with the values present in smartPlaylist
+     * @param gmmpSmartPlaylist the playlist that's being edited
+     * @param smartPlaylist     the playlist whose values are being read
+     * @param errorLog          log for errors encountered during operation
+     */
+    private void overrideDefaults(final GmmpSmartPlaylist gmmpSmartPlaylist, final AgnosticSmartPlaylist smartPlaylist,
+            final Collection<String> errorLog) {
+        if (smartPlaylist.isMatchAll() != null) {
+            gmmpSmartPlaylist.setMatchAll(smartPlaylist.isMatchAll());
+        }
+        if (smartPlaylist.getOrder() != null) {
+            if (smartPlaylist.getOrder().getKey() != null) {
+                if (ORDER_BY_MAP.inverse().get(smartPlaylist.getOrder().getKey()) != null) {
+                    gmmpSmartPlaylist.setOrder(ORDER_BY_MAP.inverse().get(smartPlaylist.getOrder().getKey()));
+                } else {
+                    log(errorLog, String.format("Order value %s is not allowed in GMMP playlists", smartPlaylist.getOrder().getKey()));
+                }
+            }
+            gmmpSmartPlaylist.setAscending(smartPlaylist.getOrder().isAscending());
+        }
+        if (smartPlaylist.getLimit() != null) {
+            gmmpSmartPlaylist.setLimit(smartPlaylist.getLimit());
+        }
+    }
+
+    /**
+     * Sets the default values on the playlist. These values are what GMMP uses when they are missing from the XML.
+     * @param smartPlaylist the playlist to to set defaults on
+     */
+    private void setDefaultsOn(final AgnosticSmartPlaylist smartPlaylist) {
+        final Order order = new Order();
+        order.setKey(defaultOrderByField);
+        order.setAscending(defaultOrderIsAscending);
+        smartPlaylist.setOrder(order);
+        smartPlaylist.setMatchAll(defaultMatchAll);
+        smartPlaylist.setLimit(defaultLimit);
+    }
+
+    /**
+     * Overrides the default values in smartPlaylist with the values present in gmmpSmartPlaylist
+     * @param smartPlaylist     the playlist that's being edited
+     * @param gmmpSmartPlaylist the playlist whose values are being read
+     * @param errorLog          log for errors encountered during operation
+     */
+    private void overrideDefaults(final AgnosticSmartPlaylist smartPlaylist, final GmmpSmartPlaylist gmmpSmartPlaylist,
+            final Collection<String> errorLog) {
+        if (gmmpSmartPlaylist.getOrder() != null) {
+            if (ORDER_BY_MAP.get(gmmpSmartPlaylist.getOrder()) != null) {
+                smartPlaylist.getOrder().setKey(ORDER_BY_MAP.get(gmmpSmartPlaylist.getOrder()));
+            } else {
+                log(errorLog, String.format("Invalid order value \"%d\" in GMMP playlist", gmmpSmartPlaylist.getOrder()));
+            }
+        }
+        if (gmmpSmartPlaylist.isAscending()) {
+            smartPlaylist.getOrder().setAscending(gmmpSmartPlaylist.isAscending());
+        }
+        if (gmmpSmartPlaylist.isMatchAll() != null) {
+            smartPlaylist.setMatchAll(gmmpSmartPlaylist.isMatchAll());
+        }
+        if (gmmpSmartPlaylist.getLimit() != null) {
+            smartPlaylist.setLimit(gmmpSmartPlaylist.getLimit());
+        }
     }
 
     private void log(final Collection<String> errorLog, final String message) {

@@ -12,7 +12,7 @@ import java.util.List;
 public class AgnosticSmartPlaylist implements SmartPlaylist {
     private PlaylistType playlistType;
     private String name;
-    private boolean matchAll;
+    private Boolean matchAll;
     private Integer limit;
     private Order order;
     private final List<Rule> rules;
@@ -39,11 +39,11 @@ public class AgnosticSmartPlaylist implements SmartPlaylist {
         return this;
     }
 
-    public boolean isMatchAll() {
+    public Boolean isMatchAll() {
         return matchAll;
     }
 
-    public AgnosticSmartPlaylist setMatchAll(final boolean matchAll) {
+    public AgnosticSmartPlaylist setMatchAll(final Boolean matchAll) {
         this.matchAll = matchAll;
         return this;
     }

@@ -5,6 +5,15 @@ import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
 import com.aaron.smartplaylists.playlists.GmmpSmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV11SmartPlaylist;
 import com.aaron.smartplaylists.playlists.XbmcV12SmartPlaylist;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,15 +21,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.UnrecognizedOptionException;
-import org.apache.log4j.Logger;
 
 /**
  * The command line version of the SmartPlaylists program. This converts a playlist file that was passed in on the
@@ -106,7 +106,7 @@ public class CommandLineConverter {
     }
 
     public static void run(final String[] arguments) {
-        final BasicParser parser = new BasicParser();
+        final CommandLineParser parser = new BasicParser();
         final CommandLine commandLine;
         try {
             commandLine = parser.parse(programOptions, arguments);
