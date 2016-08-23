@@ -46,15 +46,6 @@ public class CommandLineConverter {
         programOptions.addOption(outputFileOption).addOption(formatOption);
     }
 
-    private static boolean hasHelpOption(final Option[] options) {
-        for (final Option option: options) {
-            if (option.getOpt().equals("h")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static boolean hasHelpOption(final String[] arguments) {
         for (final String arg: arguments) {
             if (arg.equals("-h") || arg.equals("--help")) {
@@ -124,7 +115,7 @@ public class CommandLineConverter {
             System.exit(1);
             return;
         }
-        if (hasHelpOption(commandLine.getOptions())) {
+        if (hasHelpOption(arguments)) {
             printHelp();
         }
 
