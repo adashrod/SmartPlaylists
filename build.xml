@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="SmartPlaylists" default="run" basedir=".">
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+        name="SmartPlaylists" default="run" basedir=".">
+    <!-- antlib stuff -->
+    <property name="ivy.install.version"       value="2.4.0"/>
+    <property name="ivy.jar.dir"               value="${basedir}/ivy"/>
+    <property name="ivy.jar.file"              value="${ivy.jar.dir}/ivy.jar"/>
+
     <property name="lib"                           value="${basedir}/lib"/>
     <property name="modules"                       value="${basedir}/modules"/>
     <property name="modules.converter"             value="${modules}/Converter"/>
@@ -32,18 +38,51 @@
     <property name="report.dir.integration"           value="${report.dir}/integration"/>
 
     <!-- where to put the final jars and what to name them -->
-    <property name="app"                value="${basedir}/antout"/>
+    <property name="app"                value="${basedir}/target"/>
     <property name="jar.converter"      value="Converter.jar"/>
     <property name="jar.smartplaylists" value="SmartPlaylists.jar"/>
 
-    <target name="compile.converter" description="compiles the Converter module, which is the API">
+    <path id="classpath.main">
+        <fileset dir="${lib}/runtime">
+            <include name="**/*.jar"/>
+        </fileset>
+        <!-- for the first-party jars -->
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    <path id="classpath.test">
+        <fileset dir="${lib}/test">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="ivy.download" unless="ivy.installed" description="downloads the ivy jar file">
+        <echo message="downloading ivy..."/>
+        <mkdir dir="${ivy.jar.dir}"/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="ivy.install" depends="ivy.download" description="registers the ivy antlib in ant">
+        <echo message="registering ivy antlib..."/>
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="ivy.resolve.main" depends="ivy.install" description="resolve ivy app dependencies">
+        <ivy:retrieve pattern="${lib}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="runtime"/>
+    </target>
+
+    <target name="ivy.resolve.test" depends="ivy.install" description="resolve ivy test dependencies">
+        <ivy:retrieve pattern="${lib}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="test"/>
+    </target>
+
+    <target name="compile.converter" depends="ivy.resolve.main" description="compiles the Converter module, which is the API">
         <mkdir dir="${converter.build}"/>
         <javac destdir="${converter.build}" includeantruntime="false">
-            <classpath>
-                <pathelement location="${lib}/guava-10.0.1.jar"/>
-                <pathelement location="${lib}/log4j-1.2.15.jar"/>
-                <pathelement location="${lib}/timeperiod-0.1.jar"/>
-            </classpath>
+            <classpath refid="classpath.main"/>
             <src path="${converter.main.java}"/>
         </javac>
 
@@ -58,16 +97,12 @@
         <jar destfile="${app}/${jar.converter}" basedir="${converter.build}" manifest="${converter.main.resources}/META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="compile.smartplaylists" depends="jar.converter"
+    <target name="compile.smartplaylists"  depends="ivy.resolve.main, jar.converter"
             description="compiles the SmartPlaylists module, which is the main program">
         <mkdir dir="${smartplaylists.build}"/>
         <javac destdir="${smartplaylists.build}" includeantruntime="false">
-            <classpath>
-                <pathelement location="${lib}/guava-10.0.1.jar"/>
-                <pathelement location="${lib}/log4j-1.2.15.jar"/>
-                <pathelement location="${lib}/commons-cli-1.2.jar"/>
-                <pathelement location="${app}/${jar.converter}"/>
-            </classpath>
+            <classpath refid="classpath.main"/>
+            <classpath path="${app}/${jar.converter}"/>
             <src path="${smartplaylists.main.java}"/>
         </javac>
 
@@ -83,6 +118,12 @@
 
     <target name="copy.lib" description="copies 3rd-party jars to the output dir">
         <copy todir="${app}">
+            <fileset dir="${lib}/runtime/jar" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib}/runtime/bundle" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
             <fileset dir="${lib}" includes="*.jar"/>
         </copy>
     </target>
@@ -96,13 +137,11 @@
         <java jar="${app}/${jar.smartplaylists}" failonerror="true" fork="true"/>
     </target>
 
-    <target name="compile.converter.test.unit" depends="jar.converter" description="compiles the Converter module unit tests">
+    <target name="compile.converter.test.unit" depends="ivy.resolve.test, jar.converter" description="compiles the Converter module unit tests">
         <mkdir dir="${converter.build.test.unit}"/>
         <javac destdir="${converter.build.test.unit}" includeantruntime="false">
-            <classpath>
-                <pathelement location="${app}/${jar.converter}"/>
-                <pathelement location="${lib}/junit-4.8.jar"/>
-            </classpath>
+            <classpath refid="classpath.test"/>
+            <classpath path="${app}/${jar.converter}"/>
             <src path="${converter.test.java.unit}"/>
         </javac>
 
@@ -111,14 +150,12 @@
         </copy>
     </target>
 
-    <target name="compile.converter.test.integration" depends="jar.converter" description="compiles the Converter module integration tests">
+    <target name="compile.converter.test.integration" depends="ivy.resolve.test, jar.converter" description="compiles the Converter module integration tests">
         <mkdir dir="${converter.build.test.integration}"/>
         <javac destdir="${converter.build.test.integration}" includeantruntime="false">
-            <classpath>
-                <pathelement location="${app}/${jar.converter}"/>
-                <pathelement location="${lib}/junit-4.8.jar"/>
-                <pathelement location="${lib}/timeperiod-0.1.jar"/>
-            </classpath>
+            <classpath refid="classpath.main"/>
+            <classpath refid="classpath.test"/>
+            <classpath path="${app}/${jar.converter}"/>
             <src path="${converter.test.java.integration}"/>
         </javac>
 
@@ -131,10 +168,8 @@
         <mkdir dir="${report.dir.unit}"/>
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
+            <classpath refid="classpath.main"/>
             <classpath>
-                <pathelement location="${lib}/junit-4.8.jar"/>
-                <pathelement location="${lib}/guava-10.0.1.jar"/>
-                <pathelement location="${lib}/timeperiod-0.1.jar"/>
                 <pathelement location="${app}/${jar.converter}"/>
                 <pathelement location="${converter.build.test.unit}"/>
             </classpath>
@@ -156,11 +191,8 @@
         <mkdir dir="${report.dir.integration}"/>
         <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
                haltonerror="false" haltonfailure="false">
+            <classpath refid="classpath.main"/>
             <classpath>
-                <pathelement location="${lib}/junit-4.8.jar"/>
-                <pathelement location="${lib}/guava-10.0.1.jar"/>
-                <pathelement location="${lib}/log4j-1.2.15.jar"/>
-                <pathelement location="${lib}/timeperiod-0.1.jar"/>
                 <pathelement location="${app}/${jar.converter}"/>
                 <pathelement location="${converter.build.test.integration}"/>
             </classpath>
