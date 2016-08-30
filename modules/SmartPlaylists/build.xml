@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+         name="SmartPlaylistsApplication" default="build" basedir=".">
+    <property name="ivy.version"            value="2.4.0"/>
+    <property name="ivy.dir"                value="${basedir}/ivy"/>
+    <property name="ivy.jar-filename"       value="${ivy.dir}/ivy.jar"/>
+
+    <property name="src.dir"                value="src"/>
+    <property name="main-java.dir"          value="${src.dir}/main/java"/>
+    <property name="main-resources.dir"     value="${src.dir}/main/resources"/>
+
+    <property name="lib.dir"                value="${basedir}/lib"/>
+    <property name="build.main"             value="${basedir}/build"/>
+
+    <property name="target.dir"             value="${basedir}/target"/>
+    <property name="jar.converter-filename" value="Converter.jar"/>
+    <property name="jar.filename"           value="SmartPlaylists.jar"/>
+
+    <path id="classpath.main">
+        <fileset dir="${lib.dir}/runtime">
+            <include name="**/*.jar"/>
+        </fileset>
+        <!-- for the first-party jars -->
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    <path id="classpath.test">
+        <fileset dir="${lib.dir}/test">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="ivy.download" unless="ivy.installed" description="downloads the ivy jar file">
+        <echo message="downloading ivy..."/>
+        <mkdir dir="${ivy.dir}"/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" dest="${ivy.jar-filename}" usetimestamp="true"/>
+    </target>
+
+    <target name="ivy.install" depends="ivy.download" description="registers the ivy antlib in ant">
+        <echo message="registering ivy antlib..."/>
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="ivy-resolve.main" depends="ivy.install" description="resolve ivy app dependencies">
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="runtime"/>
+    </target>
+
+    <target name="compile" depends="ivy-resolve.main" description="compiles the SmartPlaylists application">
+        <mkdir dir="${build.main}"/>
+        <javac destdir="${build.main}" includeantruntime="false">
+            <classpath refid="classpath.main"/>
+            <classpath path="${target.dir}/${jar.converter-filename}"/>
+            <src path="${main-java.dir}"/>
+        </javac>
+
+        <copy todir="${build.main}">
+            <fileset dir="${main-resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile" description="creates a jar from the SmartPlaylists module">
+        <pathconvert refid="classpath.main" property="manifest.classpath" pathsep=" ">
+            <!--  before mapping, they will all be absolute paths -->
+            <map from="${basedir}/lib/runtime/bundle/" to=""/>
+            <map from="${basedir}/lib/runtime/jar/" to=""/>
+            <map from="${basedir}/lib/" to=""/>
+        </pathconvert>
+
+        <jar destfile="${target.dir}/${jar.filename}" basedir="${build.main}" manifest="${main-resources.dir}/META-INF/MANIFEST.MF">
+            <manifest>
+                <attribute name="Main-Class" value="com.aaron.smartplaylists.SmartPlaylists"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="copy-lib" description="copies 3rd-party jars to the output dir">
+        <copy todir="${target.dir}">
+            <fileset dir="${lib.dir}/runtime/jar" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}/runtime/bundle" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}" includes="*.jar"/>
+        </copy>
+    </target>
+
+    <target name="build" depends="jar, copy-lib"
+            description="compiles, creates jars, and copies 3rd-party jars">
+        <chmod file="${target.dir}/${jar.filename}" perm="ugo+x"/>
+    </target>
+
+    <target name="run" depends="build" description="builds everything and runs the GUI">
+        <java jar="${target.dir}/${jar.filename}" failonerror="true" fork="true"/>
+    </target>
+
+    <target name="clean" description="deletes all build artifacts">
+        <delete dir="${lib.dir}/runtime"/>
+        <delete dir="${lib.dir}/test"/>
+        <delete dir="${build.main}"/>
+        <delete dir="${target.dir}"/>
+    </target>
+</project>

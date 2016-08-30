@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+         name="SmartPlaylistsConverterApi" default="build" basedir=".">
+    <property name="ivy.version"                      value="2.4.0"/>
+    <property name="ivy.dir"                          value="${basedir}/ivy"/>
+    <property name="ivy.jar-filename"                 value="${ivy.dir}/ivy.jar"/>
+
+    <property name="src.dir"                          value="src"/>
+    <property name="main-java.dir"                    value="${src.dir}/main/java"/>
+    <property name="main-resources.dir"               value="${src.dir}/main/resources"/>
+
+    <property name="test-java.dir"                    value="${src.dir}/test/java"/>
+    <property name="test-unit.dir"                    value="${test-java.dir}/unit"/>
+    <property name="test-integration.dir"             value="${test-java.dir}/integration"/>
+    <property name="test-resources.dir"               value="${src.dir}/test/resources"/>
+
+    <property name="lib.dir"                          value="${basedir}/lib"/>
+
+    <property name="build.dir"                        value="${basedir}/build/main"/>
+    <property name="build.test-dir"                   value="${basedir}/build/test"/>
+    <property name="build.unit-test"                  value="${build.test-dir}/unit"/>
+    <property name="build.integration-test"           value="${build.test-dir}/integration"/>
+    <property name="report.dir"                       value="${build.test-dir}/report"/>
+    <property name="report.dir.unit"                  value="${report.dir}/unit"/>
+    <property name="report.dir.integration"           value="${report.dir}/integration"/>
+
+    <property name="target.dir"                       value="${basedir}/target"/>
+    <property name="jar.filename"                     value="Converter.jar"/>
+
+    <path id="classpath.main">
+        <fileset dir="${lib.dir}/runtime">
+            <include name="**/*.jar"/>
+        </fileset>
+        <!-- for the first-party jars -->
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    <path id="classpath.test">
+        <fileset dir="${lib.dir}/test">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="ivy.download" unless="ivy.installed" description="downloads the ivy jar file">
+        <echo message="downloading ivy..."/>
+        <mkdir dir="${ivy.dir}"/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" dest="${ivy.jar-filename}" usetimestamp="true"/>
+    </target>
+
+    <target name="ivy.install" depends="ivy.download" description="registers the ivy antlib in ant">
+        <echo message="registering ivy antlib..."/>
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="ivy-resolve.main" depends="ivy.install" description="resolve ivy app dependencies">
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="runtime"/>
+    </target>
+
+    <target name="ivy-resolve.test" depends="ivy.install" description="resolve ivy test dependencies">
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="test"/>
+    </target>
+
+    <target name="compile" depends="ivy-resolve.main" description="compiles the Converter API module">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}" includeantruntime="false">
+            <classpath refid="classpath.main"/>
+            <src path="${main-java.dir}"/>
+        </javac>
+
+        <copy todir="${build.dir}">
+            <fileset dir="${main-resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile" description="creates a jar from the Converter module">
+        <mkdir dir="${target.dir}"/>
+        <jar destfile="${target.dir}/${jar.filename}" basedir="${build.dir}"/>
+    </target>
+
+    <target name="copy-lib" description="copies 3rd-party and 1st-party jars to the target dir">
+        <copy todir="${target.dir}">
+            <fileset dir="${lib.dir}/runtime/jar" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}/runtime/bundle" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}" erroronmissingdir="false">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="build" depends="jar, copy-lib" description="compiles, creates jars, and copies 3rd-party jars"/>
+
+    <target name="compile.unit-tests" depends="ivy-resolve.test, jar" description="compiles the Converter module unit tests">
+        <mkdir dir="${build.unit-test}"/>
+        <javac destdir="${build.unit-test}" includeantruntime="false">
+            <classpath refid="classpath.test"/>
+            <classpath path="${target.dir}/${jar.filename}"/>
+            <src path="${test-unit.dir}"/>
+        </javac>
+
+        <copy todir="${build.unit-test}">
+            <fileset dir="${test-resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="compile.integration-tests" depends="ivy-resolve.test, jar" description="compiles the Converter module integration tests">
+        <mkdir dir="${build.integration-test}"/>
+        <javac destdir="${build.integration-test}" includeantruntime="false">
+            <classpath refid="classpath.main"/>
+            <classpath refid="classpath.test"/>
+            <classpath path="${target.dir}/${jar.filename}"/>
+            <src path="${test-integration.dir}"/>
+        </javac>
+
+        <copy todir="${build.integration-test}">
+            <fileset dir="${test-resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="test.unit-tests" depends="compile.unit-tests" description="Runs all of the unit tests">
+        <mkdir dir="${report.dir.unit}"/>
+        <junit fork="true" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
+               haltonerror="false" haltonfailure="false">
+            <classpath refid="classpath.main"/>
+            <classpath refid="classpath.test"/>
+            <classpath>
+                <pathelement location="${target.dir}/${jar.filename}"/>
+                <pathelement location="${build.unit-test}"/>
+            </classpath>
+
+            <formatter type="plain"/>
+            <formatter type="plain" usefile="false"/>
+            <batchtest todir="${report.dir.unit}">
+                <fileset dir="${build.unit-test}" includes="**/*.class"/>
+            </batchtest>
+        </junit>
+        <junitreport todir="${report.dir.unit}">
+            <fileset dir="${report.dir.unit}" includes="TEST-*.xml"/>
+            <report todir="${report.dir.unit}"/>
+        </junitreport>
+        <echo message="=====Test results are in ${report.dir}====="/>
+        <fail if="testfailed" message="Some test(s) failed."/>
+    </target>
+
+    <target name="test.integration-tests" depends="compile.integration-tests" description="Runs all of the integration tests">
+        <mkdir dir="${report.dir.integration}"/>
+        <junit fork="true" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
+               haltonerror="true" haltonfailure="true">
+            <classpath refid="classpath.main"/>
+            <classpath refid="classpath.test"/>
+            <classpath>
+                <pathelement location="${target.dir}/${jar.filename}"/>
+                <pathelement location="${build.integration-test}"/>
+            </classpath>
+
+            <formatter type="plain"/>
+            <formatter type="plain" usefile="false"/>
+            <batchtest todir="${report.dir.integration}">
+                <fileset dir="${build.integration-test}" includes="**/*.class"/>
+            </batchtest>
+        </junit>
+        <junitreport todir="${report.dir.integration}">
+            <fileset dir="${report.dir.integration}" includes="TEST-*.xml"/>
+            <report todir="${report.dir.integration}"/>
+        </junitreport>
+        <echo message="=====Test results are in ${report.dir}====="/>
+        <fail if="testfailed" message="Some test(s) failed."/>
+    </target>
+
+    <target name="test" depends="test.unit-tests, test.integration-tests" description="Runs all tests"/>
+
+    <target name="clean" description="deletes all build artifacts">
+        <delete dir="${lib.dir}/runtime"/>
+        <delete dir="${lib.dir}/test"/>
+        <delete dir="${build.dir}"/>
+        <delete dir="${build.test-dir}"/>
+        <delete dir="${target.dir}"/>
+    </target>
+</project>

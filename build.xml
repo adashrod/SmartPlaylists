@@ -1,219 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
-        name="SmartPlaylists" default="run" basedir=".">
-    <!-- antlib stuff -->
-    <property name="ivy.install.version"       value="2.4.0"/>
-    <property name="ivy.jar.dir"               value="${basedir}/ivy"/>
-    <property name="ivy.jar.file"              value="${ivy.jar.dir}/ivy.jar"/>
+         name="SmartPlaylistsMasterBuild" default="build" basedir=".">
+    <property name="converter-module.dir" value="${basedir}/modules/Converter"/>
+    <property name="converter-artifact"   value="Converter.jar"/>
+    <property name="app-module.dir"       value="${basedir}/modules/SmartPlaylists"/>
 
-    <property name="lib"                           value="${basedir}/lib"/>
-    <property name="modules"                       value="${basedir}/modules"/>
-    <property name="modules.converter"             value="${modules}/Converter"/>
-    <property name="modules.smartplaylists"        value="${modules}/SmartPlaylists"/>
-
-    <!-- directories in the main source -->
-    <property name="converter.src"                 value="${modules.converter}/src"/>
-    <property name="converter.main.java"           value="${converter.src}/main/java"/>
-    <property name="converter.main.resources"      value="${converter.src}/main/resources"/>
-    <property name="smartplaylists.main"           value="${modules.smartplaylists}/src"/>
-    <property name="smartplaylists.main.java"      value="${smartplaylists.main}/main/java"/>
-    <property name="smartplaylists.main.resources" value="${smartplaylists.main}/main/resources"/>
-
-    <!-- directories in the test source -->
-    <property name="converter.test.java"             value="${converter.src}/test/java"/>
-    <property name="converter.test.java.unit"        value="${converter.test.java}/unit"/>
-    <property name="converter.test.java.integration" value="${converter.test.java}/integration"/>
-    <property name="converter.test.resources"        value="${converter.src}/test/resources"/>
-
-    <!-- build directories -->
-    <property name="build"                            value="${basedir}/build"/>
-    <property name="build.test"                       value="${build}/test"/>
-    <property name="converter.build"                  value="${build}/Converter"/>
-    <property name="smartplaylists.build"             value="${build}/SmartPlaylists"/>
-    <property name="converter.build.test"             value="${build.test}/converter"/>
-    <property name="converter.build.test.unit"        value="${converter.build.test}/unit"/>
-    <property name="converter.build.test.integration" value="${converter.build.test}/integration"/>
-    <property name="report.dir"                       value="${build}/report"/>
-    <property name="report.dir.unit"                  value="${report.dir}/unit"/>
-    <property name="report.dir.integration"           value="${report.dir}/integration"/>
-
-    <!-- where to put the final jars and what to name them -->
-    <property name="app"                value="${basedir}/target"/>
-    <property name="jar.converter"      value="Converter.jar"/>
-    <property name="jar.smartplaylists" value="SmartPlaylists.jar"/>
-
-    <path id="classpath.main">
-        <fileset dir="${lib}/runtime">
-            <include name="**/*.jar"/>
-        </fileset>
-        <!-- for the first-party jars -->
-        <fileset dir="${lib}">
-            <include name="*.jar"/>
-        </fileset>
-    </path>
-    <path id="classpath.test">
-        <fileset dir="${lib}/test">
-            <include name="**/*.jar"/>
-        </fileset>
-    </path>
-
-    <target name="ivy.download" unless="ivy.installed" description="downloads the ivy jar file">
-        <echo message="downloading ivy..."/>
-        <mkdir dir="${ivy.jar.dir}"/>
-        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true"/>
+    <target name="converter.build" description="builds the converter API module">
+        <subant target="build">
+            <fileset dir="${converter-module.dir}" includes="build.xml"/>
+        </subant>
     </target>
 
-    <target name="ivy.install" depends="ivy.download" description="registers the ivy antlib in ant">
-        <echo message="registering ivy antlib..."/>
-        <path id="ivy.lib.path">
-            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-        </path>
-        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
-    </target>
-
-    <target name="ivy.resolve.main" depends="ivy.install" description="resolve ivy app dependencies">
-        <ivy:retrieve pattern="${lib}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="runtime"/>
-    </target>
-
-    <target name="ivy.resolve.test" depends="ivy.install" description="resolve ivy test dependencies">
-        <ivy:retrieve pattern="${lib}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="test"/>
-    </target>
-
-    <target name="compile.converter" depends="ivy.resolve.main" description="compiles the Converter module, which is the API">
-        <mkdir dir="${converter.build}"/>
-        <javac destdir="${converter.build}" includeantruntime="false">
-            <classpath refid="classpath.main"/>
-            <src path="${converter.main.java}"/>
-        </javac>
-
-        <copy todir="${converter.build}">
-             <fileset dir="${converter.main.resources}"/>
-        </copy>
-    </target>
-
-    <target name="jar.converter" depends="compile.converter"
-            description="creates a jar from the Converter module">
-        <mkdir dir="${app}"/>
-        <jar destfile="${app}/${jar.converter}" basedir="${converter.build}" manifest="${converter.main.resources}/META-INF/MANIFEST.MF"/>
-    </target>
-
-    <target name="compile.smartplaylists"  depends="ivy.resolve.main, jar.converter"
-            description="compiles the SmartPlaylists module, which is the main program">
-        <mkdir dir="${smartplaylists.build}"/>
-        <javac destdir="${smartplaylists.build}" includeantruntime="false">
-            <classpath refid="classpath.main"/>
-            <classpath path="${app}/${jar.converter}"/>
-            <src path="${smartplaylists.main.java}"/>
-        </javac>
-
-        <copy todir="${smartplaylists.build}">
-             <fileset dir="${smartplaylists.main.resources}"/>
-        </copy>
-    </target>
-
-    <target name="jar.smartplaylists" depends="jar.converter, compile.smartplaylists"
-            description="creates a jar from the SmartPlaylists module">
-        <jar destfile="${app}/${jar.smartplaylists}" basedir="${smartplaylists.build}" manifest="${smartplaylists.main.resources}/META-INF/MANIFEST.MF"/>
-    </target>
-
-    <target name="copy.lib" description="copies 3rd-party jars to the output dir">
-        <copy todir="${app}">
-            <fileset dir="${lib}/runtime/jar" erroronmissingdir="false">
+    <target name="copy-dependencies" depends="converter.build" description="copies the build artifact from the converter module to the lib dir of the application module">
+        <copy todir="${app-module.dir}/lib">
+            <fileset dir="${converter-module.dir}/target">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${lib}/runtime/bundle" erroronmissingdir="false">
+        </copy>
+    </target>
+
+    <target name="application.build" depends="copy-dependencies" description="builds the application module">
+        <subant target="build">
+            <fileset dir="${app-module.dir}" includes="build.xml"/>
+        </subant>
+    </target>
+
+    <target name="build" depends="application.build" description="builds everything and puts artifacts in the target dir">
+        <copy todir="target">
+            <fileset dir="${app-module.dir}/target">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${lib}" includes="*.jar"/>
         </copy>
     </target>
 
-    <target name="build.all" depends="jar.smartplaylists, copy.lib"
-            description="compiles, creates jars, and copies 3rd-party jars">
-        <chmod file="${app}/${jar.smartplaylists}" perm="ugo+x"/>
-    </target>
-
-    <target name="run" depends="build.all" description="builds everything and runs the GUI">
-        <java jar="${app}/${jar.smartplaylists}" failonerror="true" fork="true"/>
-    </target>
-
-    <target name="compile.converter.test.unit" depends="ivy.resolve.test, jar.converter" description="compiles the Converter module unit tests">
-        <mkdir dir="${converter.build.test.unit}"/>
-        <javac destdir="${converter.build.test.unit}" includeantruntime="false">
-            <classpath refid="classpath.test"/>
-            <classpath path="${app}/${jar.converter}"/>
-            <src path="${converter.test.java.unit}"/>
-        </javac>
-
-        <copy todir="${converter.build.test.unit}">
-             <fileset dir="${converter.test.resources}"/>
-        </copy>
-    </target>
-
-    <target name="compile.converter.test.integration" depends="ivy.resolve.test, jar.converter" description="compiles the Converter module integration tests">
-        <mkdir dir="${converter.build.test.integration}"/>
-        <javac destdir="${converter.build.test.integration}" includeantruntime="false">
-            <classpath refid="classpath.main"/>
-            <classpath refid="classpath.test"/>
-            <classpath path="${app}/${jar.converter}"/>
-            <src path="${converter.test.java.integration}"/>
-        </javac>
-
-        <copy todir="${converter.build.test.integration}">
-             <fileset dir="${converter.test.resources}"/>
-        </copy>
-    </target>
-
-    <target name="test.unit.run" depends="compile.converter.test.unit" description="Runs all of the unit tests">
-        <mkdir dir="${report.dir.unit}"/>
-        <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
-               haltonerror="false" haltonfailure="false">
-            <classpath refid="classpath.main"/>
-            <classpath>
-                <pathelement location="${app}/${jar.converter}"/>
-                <pathelement location="${converter.build.test.unit}"/>
-            </classpath>
-
-            <formatter type="xml"/>
-
-            <batchtest todir="${report.dir.unit}">
-                <fileset dir="${converter.build.test.unit}" includes="**/*.class"/>
-            </batchtest>
-        </junit>
-        <junitreport todir="${report.dir.unit}">
-            <fileset dir="${report.dir.unit}" includes="TEST-*.xml"/>
-            <report todir="${report.dir.unit}"/>
-        </junitreport>
-        <fail if="testfailed" message="Some test(s) failed."/>
-    </target>
-
-    <target name="test.integration.run" depends="compile.converter.test.integration" description="Runs all of the integration tests">
-        <mkdir dir="${report.dir.integration}"/>
-        <junit fork="on" forkmode="once" maxmemory="1024m" failureproperty="testfailed" printsummary="true"
-               haltonerror="false" haltonfailure="false">
-            <classpath refid="classpath.main"/>
-            <classpath>
-                <pathelement location="${app}/${jar.converter}"/>
-                <pathelement location="${converter.build.test.integration}"/>
-            </classpath>
-
-            <formatter type="xml"/>
-
-            <batchtest todir="${report.dir.integration}">
-                <fileset dir="${converter.build.test.integration}" includes="**/*.class"/>
-            </batchtest>
-        </junit>
-        <junitreport todir="${report.dir.integration}">
-            <fileset dir="${report.dir.integration}" includes="TEST-*.xml"/>
-            <report todir="${report.dir.integration}"/>
-        </junitreport>
-        <fail if="testfailed" message="Some test(s) failed."/>
-    </target>
-
-    <target name="test" depends="test.unit.run, test.integration.run" description="Runs all tests"/>
-
-    <target name="clean" description="deletes all build artifacts">
-        <delete dir="${build}"/>
-        <delete dir="${app}"/>
+    <target name="clean" description="cleans all build artifacts of all modules">
+        <delete dir="target"/>
+        <subant target="clean">
+            <fileset dir="${converter-module.dir}" includes="build.xml"/>
+        </subant>
+        <subant target="clean">
+            <fileset dir="${app-module.dir}" includes="build.xml"/>
+        </subant>
     </target>
 </project>

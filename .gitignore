@@ -1,9 +1,15 @@
 /.idea
 *.iml
 
-/lib/runtime
-/ivy
-/build
 /target
+/modules/Converter/ivy
+/modules/Converter/lib/runtime
+/modules/Converter/lib/test
+/modules/Converter/build
+/modules/Converter/target
+/modules/SmartPlaylists/ivy
+/modules/SmartPlaylists/lib
+/modules/SmartPlaylists/build
+/modules/SmartPlaylists/target
 
 /todo.txt

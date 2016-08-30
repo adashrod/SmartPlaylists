@@ -19,22 +19,10 @@ http://gonemadmusicplayer.blogspot.com/2012/12/a-look-at-smart-playlists.html
 
 It hasn't yet been tested with XBMC version 13 or versions below 11.
 
-Dependencies
-------------
-It's dependent on the following jars and there is currently no dependency management in place. The ant build file will look for these in {project root}/lib.
-Third party:
-* guava-10.0.1.jar (Google Java)
-* log4j-log4j-1.2.15.jar (Apache logger)
-* junit-4.8.jar (JUnit for unit and integration tests)
-* commons-cli-1.2.jar (Apache CLI argument parser)
-Other:
-* time-period-0.1.jar (https://github.com/adashrod/TimePeriod)
-
 Prerequisites
 -------------
 * Java SDK 8
 * ant, the Java-based make tool
-* all of the jar files listed in the previous section (time-period-0.1.jar is checked in here)
 
 Usage
 -----

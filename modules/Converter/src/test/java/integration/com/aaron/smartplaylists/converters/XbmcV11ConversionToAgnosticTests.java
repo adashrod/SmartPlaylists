@@ -1,6 +1,7 @@
 package com.aaron.smartplaylists.converters;
 
 import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
+import com.aaron.smartplaylists.api.PlaylistConverter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,9 +15,9 @@ import static junit.framework.Assert.assertEquals;
  * integration tests for the v11 converter (XBMC format -> Agnostic)
  */
 public class XbmcV11ConversionToAgnosticTests {
-    private final String TEST_PLAYLIST_DIRECTORY = "./modules/Converter/src/test/resources/";
+    private final String TEST_PLAYLIST_DIRECTORY = "./src/test/resources/";
 
-    private final XbmcV11PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
+    private final PlaylistConverter xbmcV11PlaylistConverter = new XbmcV11PlaylistConverter();
 
     private final Collection<String> errorLog = new ArrayList<>();
 
