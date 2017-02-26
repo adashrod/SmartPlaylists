@@ -1,10 +1,10 @@
-package com.aaron.smartplaylists.converters;
+package com.adashrod.smartplaylists.converters;
 
-import com.aaron.smartplaylists.api.PlaylistConverter;
-import com.aaron.smartplaylists.playlists.MetadataField;
-import com.aaron.smartplaylists.playlists.Operator;
-import com.aaron.smartplaylists.playlists.Rule;
-import com.aaron.smartplaylists.playlists.AgnosticSmartPlaylist;
+import com.adashrod.smartplaylists.api.PlaylistConverter;
+import com.adashrod.smartplaylists.playlists.MetadataField;
+import com.adashrod.smartplaylists.playlists.Operator;
+import com.adashrod.smartplaylists.playlists.Rule;
+import com.adashrod.smartplaylists.playlists.AgnosticSmartPlaylist;
 import org.junit.Before;
 import org.junit.Test;
 

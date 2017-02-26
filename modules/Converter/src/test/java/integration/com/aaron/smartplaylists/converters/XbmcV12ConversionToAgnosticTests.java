@@ -1,7 +1,7 @@
-package com.aaron.smartplaylists.converters;
+package com.adashrod.smartplaylists.converters;
 
-import com.aaron.smartplaylists.api.FormattedSmartPlaylist;
-import com.aaron.smartplaylists.api.PlaylistConverter;
+import com.adashrod.smartplaylists.api.FormattedSmartPlaylist;
+import com.adashrod.smartplaylists.api.PlaylistConverter;
 import org.junit.Before;
 import org.junit.Test;
 

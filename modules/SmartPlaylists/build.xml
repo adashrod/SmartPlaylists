@@ -70,9 +70,9 @@
             <map from="${basedir}/lib/" to=""/>
         </pathconvert>
 
-        <jar destfile="${target.dir}/${jar.filename}" basedir="${build.main}" manifest="${main-resources.dir}/META-INF/MANIFEST.MF">
+        <jar destfile="${target.dir}/${jar.filename}" basedir="${build.main}">
             <manifest>
-                <attribute name="Main-Class" value="com.aaron.smartplaylists.SmartPlaylists"/>
+                <attribute name="Main-Class" value="com.adashrod.smartplaylists.SmartPlaylists"/>
                 <attribute name="Class-Path" value="${manifest.classpath}"/>
             </manifest>
         </jar>
